@@ -1142,7 +1142,7 @@
                 }
                 return '<code>' + escapeHtml(code) + '</code>';
             };
-            const html = marked.parse(markdown, { renderer: renderer, async: false });
+            const html = marked(markdown, { renderer: renderer, async: false });
             container.innerHTML = html;
 
             if (typeof renderMathInElement !== 'undefined') {
