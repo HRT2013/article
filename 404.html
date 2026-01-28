@@ -1116,10 +1116,15 @@
         function renderMarkdownAndLaTeX(markdown, containerId) {
             const container = document.getElementById(containerId);
             if (!container) return;
-
+            
+            console.log('开始渲染');
             if (typeof marked === 'undefined') {
+
+            console.log('开始渲染1');
                 loadScript('https://cdn.jsdelivr.net/npm/marked@4.3.0/lib/marked.min.js', function () {
+            console.log('开始1');
                     loadScript('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js', function () {
+            console.log('开始2');
                         loadScript('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js', function () {
                             renderContent(markdown, container);
                         });
@@ -1131,6 +1136,8 @@
         }
 
         function renderContent(markdown, container) {
+            
+            console.log('开始');
             const renderer = new marked.Renderer();
             const originalCodeRenderer = renderer.code;
 
