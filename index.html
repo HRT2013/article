@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-light.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
@@ -16,204 +17,360 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 
     <style>
-        :root { --md-primary-fg-color: #3f51b5; --sidebar-width: 260px; --header-height: 48px; }
+        :root {
+            --md-primary-fg-color: #3f51b5;
+            --md-text-color: #333;
+            --sidebar-width: 280px;
+            --header-height: 54px;
+        }
+
+        /* 基础布局 */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Roboto', 'Noto Sans SC', sans-serif; background: #fff; display: flex; flex-direction: column; }
+        body { font-family: 'Roboto', 'Noto Sans SC', sans-serif; background: #fdfdfd; line-height: 1.6; }
 
-        /* 布局 */
-        .header { background: var(--md-primary-fg-color); color: white; height: var(--header-height); display: flex; align-items: center; padding: 0 20px; position: fixed; width: 100%; z-index: 1000; }
-        .container { display: flex; margin-top: var(--header-height); max-width: 1200px; margin: var(--header-height) auto 0; width: 100%; }
+        /* 导航头 */
+        .header { background: var(--md-primary-fg-color); color: white; height: var(--header-height); display: flex; align-items: center; padding: 0 24px; position: fixed; width: 100%; top: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header-title { font-size: 1.2rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 12px; }
+        .auth-zone { margin-left: auto; }
+
+        /* 内容布局 */
+        .container { display: flex; margin-top: var(--header-height); max-width: 1400px; margin-left: auto; margin-right: auto; width: 100%; min-height: calc(100vh - var(--header-height)); }
+        
+        /* 侧边栏 */
         .sidebar { width: var(--sidebar-width); background: #f8f9fb; border-right: 1px solid #eee; position: sticky; top: var(--header-height); height: calc(100vh - var(--header-height)); overflow-y: auto; padding: 20px 0; }
-        .main-content { flex: 1; padding: 40px; min-width: 0; background: white; }
+        .nav-group-title { padding: 8px 24px; color: #999; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+        .nav-item { display: block; padding: 10px 24px; color: var(--md-text-color); text-decoration: none; font-size: 0.95rem; cursor: pointer; border-left: 4px solid transparent; }
+        .nav-item:hover { background: #eee; }
+        .nav-item.active { color: var(--md-primary-fg-color); border-left-color: var(--md-primary-fg-color); background: #e8eaf6; font-weight: 600; }
 
-        /* MkDocs Admonition (折叠/提示框) */
-        .admonition { margin: 1.5em 0; border-left: 0.2rem solid #448aff; background: #f8f9fb; border-radius: 0.1rem; overflow: hidden; }
-        .admonition-title { font-weight: bold; background: rgba(68,138,255,0.1); padding: 0.5rem 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-        .admonition-title::before { content: '\f05a'; font-family: "Font Awesome 6 Free"; font-weight: 900; }
-        .admonition.question { border-left-color: #29b6f6; }
-        .admonition.question .admonition-title { background: rgba(41,182,246,0.1); }
-        .admonition.warning { border-left-color: #ffa726; }
-        .admonition-content { padding: 0.8rem; }
+        /* 主内容 */
+        .main-content { flex: 1; padding: 40px 60px; background: white; min-width: 0; }
+        .article-content h1 { font-size: 2.2rem; margin-bottom: 24px; font-weight: 300; }
+        .article-content h2 { font-size: 1.6rem; margin: 1.5em 0 0.8em; border-bottom: 1px solid #eee; padding-bottom: 8px; font-weight: 400; }
+        
+        /* OI-Wiki 扩展样式：折叠框 */
+        .admonition { margin: 1.5em 0; border: 1px solid #448aff; border-left-width: 0.3rem; border-radius: 4px; background: #fff; }
+        .admonition-title { font-weight: bold; padding: 12px 16px; background: rgba(68, 138, 255, 0.1); display: flex; align-items: center; cursor: pointer; }
+        .admonition-title::after { content: "\f078"; font-family: "Font Awesome 6 Free"; margin-left: auto; font-size: 0.8em; transition: 0.3s; }
+        .admonition.collapsed .admonition-title::after { transform: rotate(-90deg); }
+        .admonition-content { padding: 16px; }
         .admonition.collapsed .admonition-content { display: none; }
+        .admonition.note { border-color: #448aff; }
+        .admonition.question { border-color: #00bcd4; }
+        .admonition.warning { border-color: #ff9100; }
 
-        /* MkDocs Tabs (选项卡) */
-        .tab-group { margin: 1.5em 0; border: 1px solid #eee; border-radius: 4px; }
+        /* OI-Wiki 扩展样式：选项卡 */
+        .tab-container { margin: 1.5em 0; border: 1px solid #eee; border-radius: 6px; }
         .tab-nav { display: flex; background: #f8f9fb; border-bottom: 1px solid #eee; overflow-x: auto; }
-        .tab-btn { padding: 10px 20px; border: none; background: none; cursor: pointer; font-size: 0.85rem; white-space: nowrap; border-bottom: 2px solid transparent; }
-        .tab-btn.active { border-bottom-color: var(--md-primary-fg-color); color: var(--md-primary-fg-color); font-weight: bold; }
-        .tab-pane { display: none; padding: 15px; }
+        .tab-btn { padding: 12px 24px; cursor: pointer; border: none; background: none; font-size: 0.9em; color: #666; transition: 0.2s; }
+        .tab-btn.active { color: var(--md-primary-fg-color); border-bottom: 2px solid var(--md-primary-fg-color); background: white; font-weight: bold; }
+        .tab-pane { display: none; padding: 20px; }
         .tab-pane.active { display: block; }
 
-        /* 内容样式 */
-        .article-content { line-height: 1.7; color: #333; }
-        .article-content h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
-        .article-content pre { background: #f5f5f5; padding: 1rem; border-radius: 4px; margin: 1rem 0; overflow-x: auto; }
-        code { font-family: 'JetBrains Mono', monospace; }
-        
-        .nav-item { display: block; padding: 8px 20px; color: #444; text-decoration: none; cursor: pointer; font-size: 0.9rem; }
-        .nav-item.active { color: var(--md-primary-fg-color); background: #e8eaf6; border-left: 3px solid var(--md-primary-fg-color); }
-        .btn { padding: 6px 12px; border-radius: 4px; border: 1px solid #ddd; cursor: pointer; }
-        .btn-primary { background: var(--md-primary-fg-color); color: white; border: none; }
+        /* 代码块 */
+        pre { background: #f5f5f5; padding: 16px; border-radius: 4px; overflow-x: auto; margin: 1.5em 0; }
+        code { font-family: 'JetBrains Mono', 'Consolas', monospace; font-size: 0.9em; }
+
+        /* 通用组件 */
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .btn-primary { background: var(--md-primary-fg-color); color: white; }
+        .btn-primary:hover { opacity: 0.9; }
+        .input-field { padding: 12px; border: 1px solid #ddd; border-radius: 4px; width: 100%; margin-bottom: 15px; font-size: 1rem; }
+        #editor-md { min-height: 500px; font-family: monospace; }
+
+        @media (max-width: 900px) {
+            .sidebar { display: none; }
+            .main-content { padding: 20px; }
+        }
     </style>
 </head>
 <body>
 
-<header class="header">
-    <div style="font-weight: bold; cursor:pointer" onclick="Router.go('/')">HRT's Wiki</div>
-    <div id="auth-ui" style="margin-left: auto;"></div>
-</header>
+    <header class="header">
+        <div class="header-title" onclick="Router.go('/')">
+            <i class="fas fa-book-open"></i> HRT's Wiki
+        </div>
+        <div class="auth-zone" id="auth-ui"></div>
+    </header>
 
-<div class="container">
-    <aside class="sidebar" id="sidebar-nav"></aside>
-    <main class="main-content" id="view-content"></main>
-</div>
+    <div class="container">
+        <aside class="sidebar" id="sidebar-nav"></aside>
+        <main class="main-content" id="view-content">
+            <div style="text-align:center; padding:100px; color:#999">
+                <i class="fas fa-spinner fa-spin fa-2x"></i>
+            </div>
+        </main>
+    </div>
 
-<script>
-    const CONFIG = {
-        URL: 'https://qalinnggueysnsfrmoux.supabase.co',
-        KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhbGlubmdndWV5c25zZnJtb3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2ODUwNjgsImV4cCI6MjA4NjI2MTA2OH0.rlngJnOtXVs-Q1qXxN8iSrTCbjslJu0K_qouVsgOfj0'
-    };
-    const db = window.supabase.createClient(CONFIG.URL, CONFIG.KEY);
-    let allArticles = [];
-    let currentUser = null;
-
-    // --- 扩展语法解析器 ---
-    function parseMkDocs(md) {
-        // 1. 处理折叠面板 ???+ type "Title"
-        md = md.replace(/\?\?\?\+?\s+(\w+)\s+"([^"]+)"/g, (match, type, title) => {
-            const isCollapsed = !match.includes('???+');
-            return `<div class="admonition ${type} ${isCollapsed ? 'collapsed' : ''}"><div class="admonition-title">${title}</div><div class="admonition-content">`;
-        });
-        // 闭合提示框（这里通过简单的缩进结束判断比较难，简单起见我们要求内容后接空行或结束）
-        // 改进：OI-Wiki 常用缩进代表内容。这里简化处理：遇到下一个组件前闭合。
+    <script>
+        // --- 初始化 Supabase (使用 db 避免命名冲突) ---
+        const CONFIG = {
+            URL: 'https://qalinnggueysnsfrmoux.supabase.co',
+            KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhbGlubmdndWV5c25zZnJtb3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2ODUwNjgsImV4cCI6MjA4NjI2MTA2OH0.rlngJnOtXVs-Q1qXxN8iSrTCbjslJu0K_qouVsgOfj0'
+        };
+        const db = window.supabase.createClient(CONFIG.URL, CONFIG.KEY);
         
-        // 2. 处理选项卡 === "Title"
-        // 逻辑：将连续的 === 包装成一个 tab-group
-        let lines = md.split('\n');
-        let newLines = [];
-        let inTabGroup = false;
+        let currentUser = null;
+        let allArticles = [];
 
-        for (let i = 0; i < lines.length; i++) {
-            let line = lines[i];
-            let tabMatch = line.match(/^===\s+"([^"]+)"/);
-            if (tabMatch) {
-                if (!inTabGroup) {
-                    newLines.push('<div class="tab-group"><div class="tab-nav"></div><div class="tab-body">');
-                    inTabGroup = true;
-                }
-                newLines.push(`</div><div class="tab-pane" data-title="${tabMatch[1]}">`);
-            } else if (inTabGroup && (line.trim() === "" && (i+1 < lines.length && !lines[i+1].startsWith('    ') && !lines[i+1].startsWith('===')))) {
-                // 如果遇到没有缩进的行，且不是新 tab，则关闭 group
-                newLines.push('</div></div>');
-                inTabGroup = false;
-                newLines.push(line);
+        // --- 路由系统 ---
+        const Router = {
+            getParams() {
+                const path = window.location.pathname;
+                const idMatch = path.match(/\/article\/([^/]+)/);
+                return { 
+                    id: idMatch ? idMatch[1] : null, 
+                    isNew: path.endsWith('/new'), 
+                    isEdit: path.endsWith('/edit') 
+                };
+            },
+            go(path) {
+                window.history.pushState(null, '', path);
+                this.handle();
+            },
+            async handle() {
+                const p = this.getParams();
+                if (p.isNew) showEditor();
+                else if (p.id && p.isEdit) showEditor(p.id);
+                else if (p.id) showDetail(p.id);
+                else showHome();
+                renderSidebar();
+            }
+        };
+
+        // --- 核心逻辑 ---
+        async function init() {
+            const { data: { session } } = await db.auth.getSession();
+            currentUser = session?.user || null;
+            updateAuthUI();
+            await fetchArticles();
+            Router.handle();
+            window.onpopstate = () => Router.handle();
+        }
+
+        async function fetchArticles() {
+            const { data, error } = await db.from('article').select('*').order('created_at', { ascending: false });
+            if (!error) allArticles = data;
+        }
+
+        function renderSidebar() {
+            const nav = document.getElementById('sidebar-nav');
+            const currentId = Router.getParams().id;
+            const isHome = !currentId && !Router.getParams().isNew;
+
+            let html = `<div class="nav-group-title">导航</div>`;
+            html += `<a class="nav-item ${isHome ? 'active' : ''}" onclick="Router.go('/')"><i class="fas fa-home"></i> 首页</a>`;
+            if (currentUser) {
+                html += `<a class="nav-item" style="color:#2e7d32" onclick="Router.go('/article/new')"><i class="fas fa-plus-circle"></i> 新建文章</a>`;
+            }
+
+            html += `<div class="nav-group-title" style="margin-top:20px">所有内容</div>`;
+            // 过滤掉作为首页的文章 id=home
+            allArticles.filter(a => a.id !== 'home').forEach(a => {
+                html += `<a class="nav-item ${currentId === a.id ? 'active' : ''}" onclick="Router.go('/article/${a.id}')">${escapeHtml(a.title)}</a>`;
+            });
+            nav.innerHTML = html;
+        }
+
+        async function showHome() {
+            const homeArt = allArticles.find(a => a.id === 'home');
+            if (homeArt) {
+                renderArticleHTML(homeArt);
             } else {
-                newLines.push(line);
+                document.getElementById('view-content').innerHTML = `
+                    <div class="article-content">
+                        <h1>👋 欢迎来到 HRT's Wiki</h1>
+                        <p>目前还没有设置首页内容。点击左侧文章开始阅读。</p>
+                        ${currentUser ? `<button class="btn btn-primary" onclick="createDefaultHome()">一键初始化首页</button>` : ''}
+                    </div>`;
             }
         }
-        if (inTabGroup) newLines.push('</div></div>');
-        return newLines.join('\n');
-    }
 
-    // --- 路由与UI逻辑 ---
-    const Router = {
-        go(path) { window.history.pushState(null, '', path); this.handle(); },
-        async handle() {
-            const path = window.location.pathname;
-            const id = path.match(/\/article\/([^/]+)/)?.[1];
-            if (path.endsWith('/edit')) showEditor(id);
-            else if (path.endsWith('/new')) showEditor();
-            else if (id) showDetail(id);
-            else showHome();
-            renderSidebar();
+        async function showDetail(id) {
+            const art = allArticles.find(a => a.id == id);
+            if (!art) {
+                document.getElementById('view-content').innerHTML = "<h1>404 文章未找到</h1>";
+                return;
+            }
+            renderArticleHTML(art);
         }
-    };
 
-    async function init() {
-        const { data: { session } } = await db.auth.getSession();
-        currentUser = session?.user;
-        updateAuthUI();
-        await fetchArticles();
-        Router.handle();
-    }
+        function renderArticleHTML(article) {
+            const container = document.getElementById('view-content');
+            // 预处理扩展语法
+            let processedMd = processMkDocsExtensions(article.md || '');
+            
+            container.innerHTML = `
+                <div class="article-content">
+                    <h1>${escapeHtml(article.title)}</h1>
+                    <div style="font-size:13px; color:#999; margin-bottom:30px">
+                        <i class="far fa-calendar-alt"></i> ${new Date(article.created_at).toLocaleDateString()}
+                        ${currentUser ? ` | <a href="javascript:Router.go('/article/${article.id}/edit')">编辑此页</a>` : ''}
+                    </div>
+                    <div id="md-render">${marked.parse(processedMd)}</div>
+                </div>`;
 
-    async function fetchArticles() {
-        const { data } = await db.from('article').select('*').order('created_at', { ascending: false });
-        allArticles = data || [];
-    }
+            const target = document.getElementById('md-render');
+            initAdmonitions(target);
+            initTabs(target);
+            
+            // 渲染数学公式和高亮
+            renderMathInElement(target, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}] });
+            target.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+            window.scrollTo(0,0);
+        }
 
-    function renderSidebar() {
-        const nav = document.getElementById('sidebar-nav');
-        const curId = window.location.pathname.split('/')[2];
-        nav.innerHTML = `<div style="padding:10px 20px; font-size:12px; color:#999">文章列表</div>` + 
-            allArticles.map(a => `<a class="nav-item ${curId==a.id?'active':''}" onclick="Router.go('/article/${a.id}')">${a.title}</a>`).join('');
-    }
-
-    function showDetail(id) {
-        const art = allArticles.find(a => a.id == id);
-        const container = document.getElementById('view-content');
-        if (!art) return container.innerHTML = "未找到";
-
-        container.innerHTML = `
-            <div class="article-content">
-                <div style="display:flex; justify-content:space-between; align-items:center">
-                    <h1>${art.title}</h1>
-                    ${currentUser ? `<button class="btn" onclick="Router.go('/article/${id}/edit')">编辑</button>` : ''}
-                </div>
-                <hr style="margin:20px 0; border:none; border-top:1px solid #eee">
-                <div id="render-area"></div>
-            </div>
-        `;
-
-        const area = document.getElementById('render-area');
-        // 先用扩展解析，再用 marked 解析
-        area.innerHTML = marked.parse(parseMkDocs(art.md || ''));
-
-        // 处理折叠逻辑
-        document.querySelectorAll('.admonition-title').forEach(el => {
-            el.onclick = () => el.parentElement.classList.toggle('collapsed');
-        });
-
-        // 处理选项卡 UI 生成
-        document.querySelectorAll('.tab-group').forEach(group => {
-            const nav = group.querySelector('.tab-nav');
-            const panes = group.querySelectorAll('.tab-pane');
-            panes.forEach((pane, idx) => {
-                const btn = document.createElement('button');
-                btn.className = 'tab-btn' + (idx === 0 ? ' active' : '');
-                btn.innerText = pane.dataset.title;
-                btn.onclick = () => {
-                    group.querySelectorAll('.tab-btn, .tab-pane').forEach(el => el.classList.remove('active'));
-                    btn.classList.add('active');
-                    pane.classList.add('active');
-                };
-                nav.appendChild(btn);
-                if(idx === 0) pane.classList.add('active');
+        // --- OI-Wiki 语法解析插件 ---
+        function processMkDocsExtensions(md) {
+            // 转换 ???+ note "Title" 为特定 HTML
+            let res = md.replace(/\?\?\?\+?\s+(\w+)\s+"([^"]+)"/g, (m, type, title) => {
+                return `<div class="admonition ${type}"><div class="admonition-title">${title}</div><div class="admonition-content">`;
             });
-        });
+            // 转换 === "Title" 为特定 HTML
+            res = res.replace(/===\s+"([^"]+)"/g, (m, title) => {
+                return `<div class="raw-tab-pane" data-title="${title}">`;
+            });
+            // 简单闭合处理：搜索被破坏的缩进（这里用了一个占位符，由 init 函数后置处理）
+            return res;
+        }
 
-        // 公式和代码
-        renderMathInElement(area, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}] });
-        area.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
-    }
+        function initAdmonitions(container) {
+            container.querySelectorAll('.admonition-title').forEach(t => {
+                t.onclick = () => t.parentElement.classList.toggle('collapsed');
+            });
+        }
 
-    // --- 其他基础功能 (登录、编辑等省略，保持与之前一致) ---
-    // ... (此处保留之前的 saveArticle, showEditor, showHome 函数)
-    
-    function updateAuthUI() {
-        document.getElementById('auth-ui').innerHTML = currentUser ? 
-            `<button class="btn" onclick="db.auth.signOut().then(()=>location.reload())">退出</button>` : 
-            `<button class="btn" onclick="promptLogin()">登录</button>`;
-    }
-    
-    async function promptLogin() {
-        const email = prompt("Email:"), pw = prompt("Password:");
-        const { error } = await db.auth.signInWithPassword({ email, password: pw });
-        if(!error) location.reload();
-    }
+        function initTabs(container) {
+            const rawPanes = Array.from(container.querySelectorAll('.raw-tab-pane'));
+            let currentTabContainer = null;
+            
+            rawPanes.forEach(pane => {
+                if (!currentTabContainer || pane.previousElementSibling?.className !== 'raw-tab-pane') {
+                    currentTabContainer = document.createElement('div');
+                    currentTabContainer.className = 'tab-container';
+                    pane.parentNode.insertBefore(currentTabContainer, pane);
+                    const nav = document.createElement('div');
+                    nav.className = 'tab-nav';
+                    currentTabContainer.appendChild(nav);
+                }
+                
+                const title = pane.dataset.title;
+                const btn = document.createElement('button');
+                btn.className = 'tab-btn' + (currentTabContainer.querySelectorAll('.tab-btn').length === 0 ? ' active' : '');
+                btn.innerText = title;
+                
+                const content = document.createElement('div');
+                content.className = 'tab-pane' + (btn.classList.contains('active') ? ' active' : '');
+                
+                // 寻找直到下一个 raw-tab-pane 之前的所有内容作为当前 tab 的内容
+                let next = pane.nextSibling;
+                content.appendChild(pane); // 先把标题占位符移进去
+                while(next && next.className !== 'raw-tab-pane') {
+                    let temp = next;
+                    next = next.nextSibling;
+                    content.appendChild(temp);
+                }
 
-    window.onload = init;
-    window.onpopstate = () => Router.handle();
-</script>
+                btn.onclick = () => {
+                    btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    content.parentElement.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                    btn.classList.add('active');
+                    content.classList.add('active');
+                };
+
+                currentTabContainer.querySelector('.tab-nav').appendChild(btn);
+                currentTabContainer.appendChild(content);
+            });
+        }
+
+        // --- 编辑器功能 ---
+        async function showEditor(id = null) {
+            if(!currentUser) return Router.go('/');
+            const art = id ? allArticles.find(a => a.id == id) : { title: '', md: '' };
+            
+            document.getElementById('view-content').innerHTML = `
+                <div class="editor-wrap">
+                    <h2 style="margin-bottom:20px">${id ? '编辑文章' : '创建新文章'}</h2>
+                    <input id="ed-title" class="input-field" placeholder="输入文章标题..." value="${escapeHtml(art.title)}">
+                    <textarea id="ed-md" class="input-field" placeholder="支持 Markdown 和 LaTeX...">$${art.md}</textarea>
+                    <div style="display:flex; gap:12px">
+                        <button class="btn btn-primary" onclick="saveArticle('${id || ''}')"><i class="fas fa-save"></i> 保存发布</button>
+                        ${id ? `<button class="btn" style="background:#ff5252; color:white" onclick="deleteArticle('${id}')">删除</button>` : ''}
+                        <button class="btn" onclick="Router.go('/')">取消</button>
+                    </div>
+                </div>`;
+        }
+
+        async function saveArticle(id) {
+            const title = document.getElementById('ed-title').value;
+            const md = document.getElementById('ed-md').value;
+            if(!title || !md) return alert("标题和内容不能为空");
+
+            const payload = { title, md, updated_at: new Date() };
+            let res;
+
+            if(id) {
+                res = await db.from('article').update(payload).eq('id', id);
+            } else {
+                // 生成一个随机 ID (10位，避免 8位限制报错)
+                id = Math.random().toString(36).substr(2, 10);
+                payload.id = id;
+                res = await db.from('article').insert([payload]);
+            }
+
+            if(res.error) alert("错误: " + res.error.message);
+            else {
+                await fetchArticles();
+                Router.go(id === 'home' ? '/' : '/article/' + id);
+            }
+        }
+
+        async function deleteArticle(id) {
+            if(!confirm("确定要永久删除这篇文章吗？")) return;
+            const { error } = await db.from('article').delete().eq('id', id);
+            if(!error) { await fetchArticles(); Router.go('/'); }
+        }
+
+        async function createDefaultHome() {
+            const payload = { id: 'home', title: '首页', md: '# 欢迎来到我的知识库\n请点击左侧文章开始探索。', created_at: new Date() };
+            await db.from('article').insert([payload]);
+            await fetchArticles();
+            Router.handle();
+        }
+
+        // --- 登录 UI ---
+        function updateAuthUI() {
+            const zone = document.getElementById('auth-ui');
+            if (currentUser) {
+                zone.innerHTML = `<span style="font-size:13px; margin-right:15px; opacity:0.8">${currentUser.email}</span>
+                                  <button class="btn" style="background:rgba(255,255,255,0.2); color:white" onclick="doLogout()">退出</button>`;
+            } else {
+                zone.innerHTML = `<button class="btn" style="background:rgba(255,255,255,0.2); color:white" onclick="doLogin()">登录</button>`;
+            }
+        }
+
+        async function doLogin() {
+            const email = prompt("管理员邮箱:");
+            const password = prompt("密码:");
+            if (email && password) {
+                const { error } = await db.auth.signInWithPassword({ email, password });
+                if (error) alert("登录失败: " + error.message);
+                else location.reload();
+            }
+        }
+
+        async function doLogout() {
+            await db.auth.signOut();
+            location.reload();
+        }
+
+        function escapeHtml(str) {
+            const p = document.createElement('p');
+            p.textContent = str;
+            return p.innerHTML;
+        }
+
+        window.onload = init;
+    </script>
 </body>
 </html>
