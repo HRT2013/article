@@ -164,17 +164,59 @@
             nav.innerHTML = html;
         }
 
-        function showHome() {
+        async function showHome() {
             const content = document.getElementById('view-content');
-            content.innerHTML = `
-                <div class="article-content">
-                    <h1>欢迎来到 HRT's Wiki</h1>
-                    <p>这是一个基于 Supabase 构建的个人知识库。请从左侧选择文章阅读。</p>
-                    <div style="background:#f0f7ff; border-left:4px solid #007bff; padding:15px; margin-top:20px;">
-                        <b>提示：</b> 若要管理内容，请点击右上角登录。
+            // 在文章列表中寻找 ID 为 home 的文章
+            const homeArticle = allArticles.find(a => a.id === 'home');
+        
+            if (homeArticle) {
+                // 如果找到了，直接复用渲染逻辑
+                content.innerHTML = `
+                    <div class="article-content">
+                        <div id="md-render"></div>
+                        ${currentUser ? `<div style="margin-top:20px; border-top:1px solid #eee; padding-top:10px;">
+                            <button class="btn" onclick="Router.go('/article/home/edit')"><i class="fas fa-edit"></i> 编辑首页内容</button>
+                        </div>` : ''}
                     </div>
-                </div>
-            `;
+                `;
+                const renderTarget = document.getElementById('md-render');
+                renderTarget.innerHTML = marked.parse(homeArticle.md || '');
+                
+                // 渲染数学公式和代码高亮
+                renderMathInElement(renderTarget, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}] });
+                renderTarget.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+            } else {
+                // 如果没找到，显示引导界面
+                content.innerHTML = `
+                    <div class="article-content">
+                        <h1>🏠 欢迎来到我的 Wiki</h1>
+                        <p>目前还没有设置首页内容。</p>
+                        ${currentUser ? `
+                            <div style="background:#fff3cd; color:#856404; padding:15px; border-radius:4px; margin-top:20px;">
+                                <p><b>管理员提示：</b></p>
+                                <p>点击下方按钮创建一篇 ID 为 <code>home</code> 的文章，它将自动成为你的首页。</p>
+                                <button class="btn btn-primary" style="margin-top:10px" onclick="createHomePage()">立即创建首页</button>
+                            </div>
+                        ` : '<p>请联系管理员初始化首页内容。</p>'}
+                    </div>
+                `;
+            }
+        }
+        
+        // 辅助函数：快速创建首页模板
+        async function createHomePage() {
+            const payload = {
+                id: 'home',
+                title: '首页',
+                md: '# 欢迎使用 HRT\'s Wiki \n\n这是你的首页，你可以在这里编写欢迎词、导航索引等内容。',
+                created_at: new Date()
+            };
+            const { error } = await db.from('article').insert([payload]);
+            if (error) alert("创建失败: " + error.message);
+            else {
+                await fetchArticles();
+                Router.go('/');
+            }
         }
 
         async function showDetail(id) {
@@ -284,3 +326,4 @@
     </script>
 </body>
 </html>
+
