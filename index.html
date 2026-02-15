@@ -197,4 +197,407 @@
         .btn-text:hover { background: rgba(0,0,0,0.05); }
 
         .editor-container { background: white; padding: 20px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-        .form-input, .form-textarea, .tag-input { width: 100%; padding: 1
+        .form-input, .form-textarea, .tag-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 2px; font-family: inherit; margin-bottom: 15px; }
+        .form-input:focus, .form-textarea:focus { border-color: var(--md-primary-fg-color); outline: none; border-bottom-width: 2px; padding-bottom: 9px; }
+        .form-textarea { min-height: 400px; font-family: 'JetBrains Mono', monospace; font-size: 14px; }
+
+        /* 登录框 */
+        .login-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .login-container { background: white; padding: 30px; border-radius: 4px; width: 90%; max-width: 350px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+
+        /* 元信息和标签 */
+        .meta-info { font-size: 0.8rem; color: #888; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .tag-pill { background: #f1f1f1; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; color: #666; }
+
+        /* 加载动画 */
+        .loading-spinner { text-align: center; padding: 50px; color: var(--md-primary-fg-color); }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .md-sidebar {
+                position: fixed; left: -260px; top: var(--header-height); bottom: 0; z-index: 90; transition: left 0.3s; box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            }
+            .md-sidebar.open { left: 0; }
+            .sidebar-toggle { display: block; }
+            .md-content { padding: 20px 15px; }
+        }
+
+        /* 删除确认 */
+        .delete-btn-danger { background-color: #f44336; color: white; }
+    </style>
+</head>
+
+<body>
+    <header class="md-header">
+        <i class="fas fa-bars sidebar-toggle" onclick="toggleSidebar()"></i>
+        <div class="md-header__title" onclick="router.navigate('/article')">
+            <i class="fas fa-book-open"></i> HRT's Wiki
+        </div>
+        <div class="md-header__actions">
+            <div id="auth-section"></div>
+        </div>
+    </header>
+
+    <div class="md-container">
+        <aside class="md-sidebar" id="sidebar-nav">
+            <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i></div>
+        </aside>
+
+        <main class="md-content" id="main-content">
+            </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <script>
+        // --- 1. Supabase 配置 (请确保启用 RLS 或保管好 Key) ---
+        const SUPABASE_URL = 'https://qalinnggueysnsfrmoux.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhbGlubmdndWV5c25zZnJtb3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2ODUwNjgsImV4cCI6MjA4NjI2MTA2OH0.rlngJnOtXVs-Q1qXxN8iSrTCbjslJu0K_qouVsgOfj0';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentUser = null;
+
+        // --- 2. 核心逻辑 & 路由 ---
+        const router = {
+            // 处理 GitHub Pages 的子路径问题。如果你的项目是 username.github.io/repo，这里就是 '/repo'
+            // 如果是 username.github.io 根目录，这里为空字符串 ''
+            basePath: window.location.hostname.includes('github.io') ? window.location.pathname.split('/')[1] ? '/' + window.location.pathname.split('/')[1] : '' : '',
+            
+            routes: {
+                '/article': showWelcomeOrLatest,
+                '/article/new': showEditor,
+                '/article/:id': showArticleDetail,
+                '/article/:id/edit': showEditor
+            },
+
+            async init() {
+                window.addEventListener('popstate', this.handleRoute.bind(this));
+                await checkAuth();
+                await this.handleRoute();
+                refreshSidebar(); // 初始化加载侧边栏
+            },
+
+            async handleRoute() {
+                // 处理 GitHub Pages 404 重定向带来的 query param
+                const urlParams = new URLSearchParams(window.location.search);
+                const redirectPath = urlParams.get('p');
+                if (redirectPath) {
+                    // 清除 query 参数并替换 URL
+                    window.history.replaceState(null, '', redirectPath);
+                }
+
+                let path = window.location.pathname;
+                // 移除 base path
+                if (this.basePath && path.startsWith(this.basePath)) {
+                    path = path.substring(this.basePath.length);
+                }
+                
+                if (path === '/' || path === '') {
+                    this.navigate('/article');
+                    return;
+                }
+
+                // 简单的路由匹配
+                for (const route in this.routes) {
+                    const routePattern = route.replace(/:\w+/g, '([^/]+)');
+                    const regex = new RegExp(`^${routePattern}$`);
+                    const match = path.match(regex);
+
+                    if (match) {
+                        const paramNames = [...route.matchAll(/:(\w+)/g)].map(m => m[1]);
+                        const params = {};
+                        paramNames.forEach((name, index) => params[name] = match[index + 1]);
+                        this.routes[route](params);
+                        return;
+                    }
+                }
+                showWelcomeOrLatest(); // 默认页
+            },
+
+            navigate(path) {
+                const fullPath = this.basePath + path;
+                window.history.pushState(null, '', fullPath);
+                this.handleRoute();
+                // 移动端点击导航后自动收起侧边栏
+                if(window.innerWidth < 768) {
+                    document.querySelector('.md-sidebar').classList.remove('open');
+                }
+            }
+        };
+
+        // --- 3. 页面渲染函数 ---
+
+        async function refreshSidebar() {
+            const sidebar = document.getElementById('sidebar-nav');
+            try {
+                const { data: articles, error } = await supabase
+                    .from('article')
+                    .select('id, title, created_at')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                let html = `
+                    <div class="md-nav__title">导航</div>
+                    ${currentUser ? `<li class="md-nav__item"><a class="md-nav__link" style="color:#2ecc71" onclick="router.navigate('/article/new')"><i class="fas fa-plus"></i> 新建文章</a></li>` : ''}
+                    <li class="md-nav__item"><a class="md-nav__link" onclick="router.navigate('/article')"><i class="fas fa-home"></i> 首页</a></li>
+                    <div class="md-nav__title" style="margin-top:15px">最近更新</div>
+                `;
+
+                html += articles.map(art => `
+                    <li class="md-nav__item">
+                        <a class="md-nav__link ${window.location.pathname.includes(art.id) ? 'active' : ''}" 
+                           onclick="router.navigate('/article/${art.id}')">
+                           ${escapeHtml(art.title)}
+                        </a>
+                    </li>
+                `).join('');
+
+                sidebar.innerHTML = html;
+            } catch (e) {
+                sidebar.innerHTML = '<div style="padding:15px; color:red">加载失败</div>';
+            }
+        }
+
+        async function showWelcomeOrLatest() {
+            document.title = "HRT's Wiki";
+            const content = document.getElementById('main-content');
+            
+            // 可以在这里放一个固定的 README 内容，或者直接列出文章
+            content.innerHTML = `
+                <div class="article-content">
+                    <h1>欢迎来到 HRT 的个人 Wiki</h1>
+                    <p>这是一个模仿 OI-Wiki 风格构建的个人知识库。</p>
+                    <div class="admonition note" style="background:#e3f2fd; border-left:4px solid #2196f3; padding:15px; margin:20px 0;">
+                        <p style="margin:0; font-weight:bold; color:#0d47a1">提示</p>
+                        <p style="margin:5px 0 0 0;">点击左侧侧边栏查看文章。如果你是管理员，登录后可以编辑。</p>
+                    </div>
+                </div>
+            `;
+            refreshSidebar(); // 更新高亮状态
+        }
+
+        async function showArticleDetail(params) {
+            const content = document.getElementById('main-content');
+            content.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner fa-spin fa-2x"></i></div>`;
+
+            try {
+                const { data: article, error } = await supabase
+                    .from('article')
+                    .select('*')
+                    .eq('id', params.id)
+                    .single();
+
+                if (error) throw error;
+
+                document.title = `${article.title} - HRT's Wiki`;
+
+                const tags = article.tag ? article.tag.split(',').map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join('') : '';
+                
+                content.innerHTML = `
+                    <div class="article-content">
+                        <h1>${escapeHtml(article.title)}</h1>
+                        <div class="meta-info">
+                            <span><i class="far fa-calendar"></i> ${formatDate(article.created_at)}</span>
+                            ${tags}
+                            ${currentUser ? `
+                                <button class="btn btn-text" style="color:#2ecc71" onclick="router.navigate('/article/${article.id}/edit')"><i class="fas fa-edit"></i> 编辑</button>
+                                <button class="btn btn-text" style="color:#f44336" onclick="confirmDelete('${article.id}', '${escapeHtml(article.title)}')"><i class="fas fa-trash"></i> 删除</button>
+                            ` : ''}
+                        </div>
+                        <div id="markdown-render"></div>
+                    </div>
+                `;
+
+                renderMarkdown(article.md || '', 'markdown-render');
+                refreshSidebar(); // 更新高亮
+
+            } catch (error) {
+                content.innerHTML = `<div class="article-content"><h1>404</h1><p>文章未找到或加载出错。</p></div>`;
+            }
+        }
+
+        async function showEditor(params) {
+            if (!currentUser) { showLoginPopup(); return; }
+            
+            const isEdit = !!params.id;
+            const content = document.getElementById('main-content');
+            
+            let article = { title: '', tag: '', md: '' };
+            if (isEdit) {
+                content.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> 加载编辑器...</div>`;
+                const { data, error } = await supabase.from('article').select('*').eq('id', params.id).single();
+                if (!error) article = data;
+            }
+
+            content.innerHTML = `
+                <div class="article-content">
+                    <h1>${isEdit ? '编辑文章' : '新建文章'}</h1>
+                    <div class="editor-container">
+                        <label>标题</label>
+                        <input type="text" id="edit-title" class="form-input" value="${escapeHtml(article.title)}">
+                        
+                        <label>标签 (逗号分隔)</label>
+                        <input type="text" id="edit-tag" class="tag-input" value="${escapeHtml(article.tag || '')}">
+                        
+                        <label>内容 (Markdown + LaTeX)</label>
+                        <textarea id="edit-md" class="form-textarea">${escapeHtml(article.md || '')}</textarea>
+                        
+                        <div style="margin-top:20px; display:flex; gap:10px;">
+                            <button class="btn btn-primary" onclick="saveArticle('${isEdit ? article.id : ''}')">
+                                <i class="fas fa-save"></i> 保存
+                            </button>
+                            <button class="btn btn-text" onclick="router.navigate('${isEdit ? '/article/'+article.id : '/article'}')">
+                                取消
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- 4. 数据操作逻辑 ---
+
+        async function saveArticle(id) {
+            const title = document.getElementById('edit-title').value;
+            const tag = document.getElementById('edit-tag').value;
+            const md = document.getElementById('edit-md').value;
+            
+            if(!title) return alert('标题不能为空');
+
+            const payload = { title, tag, md, updated_at: new Date() };
+            let error;
+
+            if (id) {
+                ({ error } = await supabase.from('article').update(payload).eq('id', id));
+            } else {
+                payload.id = Math.random().toString(36).substr(2, 8);
+                payload.created_at = new Date();
+                ({ error } = await supabase.from('article').insert(payload));
+                id = payload.id;
+            }
+
+            if (error) alert('保存失败: ' + error.message);
+            else {
+                alert('保存成功');
+                refreshSidebar();
+                router.navigate(`/article/${id}`);
+            }
+        }
+
+        async function confirmDelete(id, title) {
+            if(confirm(`确定要删除 "${title}" 吗？此操作不可恢复。`)) {
+                const { error } = await supabase.from('article').delete().eq('id', id);
+                if(error) alert('删除失败');
+                else {
+                    alert('已删除');
+                    refreshSidebar();
+                    router.navigate('/article');
+                }
+            }
+        }
+
+        // --- 5. 认证逻辑 ---
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            currentUser = session?.user || null;
+            updateAuthUI();
+        }
+
+        function updateAuthUI() {
+            const container = document.getElementById('auth-section');
+            if (currentUser) {
+                container.innerHTML = `
+                    <span style="margin-right:10px; opacity:0.8"><i class="fas fa-user-shield"></i> 管理员</span>
+                    <button class="btn btn-text" onclick="handleLogout()" style="color:white; padding:0">登出</button>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button class="btn btn-text" onclick="showLoginPopup()" style="color:white; padding:0"><i class="fas fa-lock"></i> 登录</button>
+                `;
+            }
+        }
+
+        function showLoginPopup() {
+            const div = document.createElement('div');
+            div.className = 'login-modal';
+            div.innerHTML = `
+                <div class="login-container">
+                    <h3 style="margin-bottom:20px">管理员登录</h3>
+                    <input type="email" id="login-email" class="form-input" placeholder="邮箱">
+                    <input type="password" id="login-password" class="form-input" placeholder="密码">
+                    <button id="do-login" class="btn btn-primary" style="width:100%">登录</button>
+                    <button id="cancel-login" class="btn btn-text" style="width:100%; margin-top:10px">取消</button>
+                </div>
+            `;
+            document.body.appendChild(div);
+
+            div.querySelector('#do-login').onclick = async () => {
+                const email = document.getElementById('login-email').value;
+                const pass = document.getElementById('login-password').value;
+                const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+                if (error) alert(error.message);
+                else {
+                    div.remove();
+                    location.reload();
+                }
+            };
+            div.querySelector('#cancel-login').onclick = () => div.remove();
+        }
+
+        async function handleLogout() {
+            await supabase.auth.signOut();
+            location.reload();
+        }
+
+        // --- 6. 工具函数 ---
+        function toggleSidebar() {
+            document.querySelector('.md-sidebar').classList.toggle('open');
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'};
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function formatDate(str) {
+            return new Date(str).toLocaleDateString('zh-CN');
+        }
+
+        function renderMarkdown(md, containerId) {
+            const container = document.getElementById(containerId);
+            // 自定义渲染器以增强代码块和表格
+            const renderer = new marked.Renderer();
+            
+            // 代码块增加复制按钮
+            renderer.code = function(code, lang) {
+                const validLang = !!(lang && hljs.getLanguage(lang)) ? lang : '';
+                const highlighted = validLang ? hljs.highlight(code, { language: validLang }).value : escapeHtml(code);
+                return `<div style="position:relative">
+                            <pre><code class="hljs ${validLang}">${highlighted}</code></pre>
+                        </div>`;
+            };
+
+            const html = marked.parse(md, { renderer });
+            container.innerHTML = html;
+            
+            // 渲染数学公式
+            renderMathInElement(container, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false}
+                ],
+                throwOnError: false
+            });
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', router.init.bind(router));
+    </script>
+</body>
+</html>
