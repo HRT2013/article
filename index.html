@@ -4,134 +4,283 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HRT's Wiki</title>
+    <link rel="icon" href="https://cdn.luogu.com.cn/upload/usericon/1057417.png" type="image/png">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-light.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
     <style>
-        :root { --sidebar-width: 280px; --primary-color: #24292e; }
-        body { margin: 0; font-family: -apple-system, sans-serif; display: flex; background: #fff; }
-        
-        /* 侧边栏 */
-        #sidebar { width: var(--sidebar-width); height: 100vh; background: #f6f8fa; border-right: 1px solid #e1e4e8; position: fixed; overflow-y: auto; z-index: 100; }
-        .sidebar-header { padding: 20px; font-size: 1.2rem; font-weight: bold; border-bottom: 1px solid #e1e4e8; background: #fff; position: sticky; top: 0; }
-        .nav-item { padding: 10px 20px; cursor: pointer; color: #0366d6; text-decoration: none; display: block; border-bottom: 1px solid #f1f1f1; }
-        .nav-item:hover { background: #ebf0f4; }
-
-        /* 主内容区 */
-        #main { margin-left: var(--sidebar-width); flex: 1; padding: 40px; min-height: 100vh; max-width: 900px; }
-        .loading-box { text-align: center; margin-top: 100px; color: #666; }
-        .error-box { padding: 20px; background: #ffeef0; border-left: 5px solid #d73a49; color: #d73a49; margin-top: 20px; }
-        
-        .article-content { line-height: 1.6; font-size: 16px; }
-        pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow: auto; }
-        img { max-width: 100%; }
-
-        @media (max-width: 768px) {
-            #sidebar { display: none; }
-            #main { margin-left: 0; padding: 20px; }
+        /* --- OI-Wiki / MkDocs Material 风格 --- */
+        :root {
+            --md-primary-fg-color: #3f51b5;
+            --md-text-color: #333;
+            --sidebar-width: 260px;
+            --header-height: 48px;
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Roboto', 'Noto Sans SC', sans-serif; background: #fdfdfd; display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* 顶部导航 */
+        .header { background: var(--md-primary-fg-color); color: white; height: var(--header-height); display: flex; align-items: center; padding: 0 20px; position: fixed; width: 100%; top: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header-title { font-size: 1.1rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .auth-zone { margin-left: auto; font-size: 0.85rem; }
+
+        /* 主布局 */
+        .container { display: flex; margin-top: var(--header-height); max-width: 1200px; margin-left: auto; margin-right: auto; width: 100%; flex: 1; }
+
+        /* 侧边栏 */
+        .sidebar { width: var(--sidebar-width); background: #f8f9fb; border-right: 1px solid #eee; position: sticky; top: var(--header-height); height: calc(100vh - var(--header-height)); overflow-y: auto; padding: 20px 0; }
+        .nav-group-title { padding: 0 16px 8px; color: #999; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+        .nav-item { display: block; padding: 8px 16px; color: var(--md-text-color); text-decoration: none; font-size: 0.9rem; cursor: pointer; border-left: 3px solid transparent; }
+        .nav-item:hover { background: #eee; }
+        .nav-item.active { color: var(--md-primary-fg-color); border-left-color: var(--md-primary-fg-color); background: #e8eaf6; font-weight: 500; }
+
+        /* 内容区 */
+        .main-content { flex: 1; padding: 40px; background: white; min-width: 0; }
+        .article-content h1 { font-size: 2rem; margin-bottom: 20px; font-weight: 400; color: #222; }
+        .article-content h2 { font-size: 1.5rem; margin: 30px 0 15px; border-bottom: 1px solid #eee; padding-bottom: 8px; font-weight: 400; }
+        .article-content p { margin-bottom: 16px; line-height: 1.7; color: #444; }
+        
+        /* 代码块样式 */
+        pre { background: #f5f5f5; padding: 15px; border-radius: 4px; overflow-x: auto; margin: 15px 0; }
+        code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; }
+
+        /* 按钮 */
+        .btn { padding: 6px 12px; border: none; border-radius: 2px; cursor: pointer; font-size: 13px; }
+        .btn-primary { background: var(--md-primary-fg-color); color: white; }
+        .btn-danger { background: #f44336; color: white; }
+
+        /* 加载中 */
+        .loading { text-align: center; padding: 50px; color: #999; }
+        
+        /* 手机端 */
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .container { padding: 0 15px; }
+        }
+
+        /* 编辑器 */
+        .editor-wrap { display: flex; flex-direction: column; gap: 15px; }
+        .input-field { padding: 10px; border: 1px solid #ddd; border-radius: 4px; width: 100%; }
+        #editor-md { min-height: 400px; font-family: monospace; }
     </style>
 </head>
 <body>
 
-<aside id="sidebar">
-    <div class="sidebar-header">HRT's Wiki</div>
-    <nav id="menu-list">
-        <div style="padding: 20px; color: #999;">正在加载列表...</div>
-    </nav>
-</aside>
-
-<main id="main">
-    <div id="content-area">
-        <div class="loading-box">
-            <i class="fas fa-spinner fa-spin fa-2x"></i>
-            <p>正在连接数据库...</p>
+    <header class="header">
+        <div class="header-title" onclick="location.href='/'">
+            <i class="fas fa-book"></i> HRT's Wiki
         </div>
+        <div class="auth-zone" id="auth-ui"></div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar" id="sidebar-nav">
+            <div class="loading"><i class="fas fa-spinner fa-spin"></i></div>
+        </aside>
+
+        <main class="main-content" id="view-content">
+            </main>
     </div>
-</main>
 
-<script>
-    // 使用你原文件中的配置
-    const SUPABASE_URL = 'https://qalinnggueysnsfrmoux.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhbGlubmdndWV5c25zZnJtb3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2ODUwNjgsImV4cCI6MjA4NjI2MTA2OH0.rlngJnOtXVs-Q1qXxN8iSrTCbjslJu0K_qouVsgOfj0';
-    
-    let supabase;
-    try {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    } catch (e) {
-        showError("Supabase SDK 加载失败，请检查网络连接。");
-    }
+    <script>
+        // --- 配置与初始化 ---
+        const CONFIG = {
+            URL: 'https://qalinnggueysnsfrmoux.supabase.co',
+            KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhbGlubmdndWV5c25zZnJtb3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2ODUwNjgsImV4cCI6MjA4NjI2MTA2OH0.rlngJnOtXVs-Q1qXxN8iSrTCbjslJu0K_qouVsgOfj0'
+        };
 
-    async function init() {
-        const contentDiv = document.getElementById('content-area');
-        const menuDiv = document.getElementById('menu-list');
+        // 使用 db 命名避开 supabase 关键字冲突
+        const db = window.supabase.createClient(CONFIG.URL, CONFIG.KEY);
+        let currentUser = null;
+        let allArticles = [];
 
-        try {
-            // 1. 获取文章列表
-            const { data: articles, error } = await supabase
-                .from('article')
-                .select('id, title, md')
-                .order('created_at', { ascending: false });
+        // --- 路由处理 ---
+        const Router = {
+            getParams() {
+                const path = window.location.pathname;
+                const idMatch = path.match(/\/article\/([^/]+)/);
+                const isNew = path.endsWith('/new');
+                const isEdit = path.endsWith('/edit');
+                return { id: idMatch ? idMatch[1] : null, isNew, isEdit };
+            },
+            go(path) {
+                window.history.pushState(null, '', path);
+                this.handle();
+            },
+            async handle() {
+                const params = this.getParams();
+                if (params.isNew) showEditor();
+                else if (params.id && params.isEdit) showEditor(params.id);
+                else if (params.id) showDetail(params.id);
+                else showHome();
+                
+                renderSidebar();
+            }
+        };
 
-            if (error) throw error;
+        // --- 核心功能 ---
+        async function init() {
+            const { data: { session } } = await db.auth.getSession();
+            currentUser = session?.user || null;
+            updateAuthUI();
+            
+            await fetchArticles();
+            Router.handle();
+            
+            window.onpopstate = () => Router.handle();
+        }
 
-            if (!articles || articles.length === 0) {
-                contentDiv.innerHTML = "<h1>欢迎</h1><p>数据库中暂无文章，请先创建内容。</p>";
-                menuDiv.innerHTML = "<div style='padding:20px'>暂无目录</div>";
+        async function fetchArticles() {
+            const { data, error } = await db.from('article').select('*').order('created_at', { ascending: false });
+            if (!error) allArticles = data;
+        }
+
+        function renderSidebar() {
+            const nav = document.getElementById('sidebar-nav');
+            const currentId = Router.getParams().id;
+            
+            let html = `<div class="nav-group-title">导航</div>`;
+            html += `<a class="nav-item ${!currentId ? 'active' : ''}" onclick="Router.go('/')">首页</a>`;
+            
+            if(currentUser) {
+                html += `<a class="nav-item" style="color:green" onclick="Router.go('/article/new')">+ 新建文章</a>`;
+            }
+
+            html += `<div class="nav-group-title" style="margin-top:20px">所有文章</div>`;
+            html += allArticles.map(a => `
+                <a class="nav-item ${currentId === a.id ? 'active' : ''}" onclick="Router.go('/article/${a.id}')">
+                    ${escapeHtml(a.title)}
+                </a>
+            `).join('');
+            
+            nav.innerHTML = html;
+        }
+
+        function showHome() {
+            const content = document.getElementById('view-content');
+            content.innerHTML = `
+                <div class="article-content">
+                    <h1>欢迎来到 HRT's Wiki</h1>
+                    <p>这是一个基于 Supabase 构建的个人知识库。请从左侧选择文章阅读。</p>
+                    <div style="background:#f0f7ff; border-left:4px solid #007bff; padding:15px; margin-top:20px;">
+                        <b>提示：</b> 若要管理内容，请点击右上角登录。
+                    </div>
+                </div>
+            `;
+        }
+
+        async function showDetail(id) {
+            const content = document.getElementById('view-content');
+            const article = allArticles.find(a => a.id == id);
+            
+            if (!article) {
+                content.innerHTML = "<h1>文章未找到</h1>";
                 return;
             }
 
-            // 2. 渲染侧边栏
-            menuDiv.innerHTML = articles.map(a => `
-                <a class="nav-item" onclick="renderArticle('${a.id}')">${escapeHtml(a.title || '无标题')}</a>
-            `).join('');
-
-            // 3. 默认渲染第一篇文章
-            window.allArticles = articles;
-            renderArticle(articles[0].id);
-
-        } catch (err) {
-            console.error("加载失败:", err);
-            showError(`数据加载失败: ${err.message || '未知错误'}<br><small>请检查 Supabase 表名是否为 "article" 以及 RLS 权限设置。</small>`);
-        }
-    }
-
-    function renderArticle(id) {
-        const article = window.allArticles.find(a => a.id == id);
-        const contentDiv = document.getElementById('content-area');
-        
-        if (article) {
-            contentDiv.innerHTML = `
-                <h1 style="border-bottom: 1px solid #eee; padding-bottom: 10px;">${escapeHtml(article.title)}</h1>
-                <div class="article-content">${marked.parse(article.md || '')}</div>
+            content.innerHTML = `
+                <div class="article-content">
+                    <h1>${escapeHtml(article.title)}</h1>
+                    <div style="color:#999; font-size:13px; margin-bottom:20px;">
+                        发布于: ${new Date(article.created_at).toLocaleDateString()}
+                        ${currentUser ? ` | <a href="#" onclick="Router.go('/article/${id}/edit')">编辑</a>` : ''}
+                    </div>
+                    <div id="md-render"></div>
+                </div>
             `;
-            // 代码高亮
-            document.querySelectorAll('pre code').forEach((el) => hljs.highlightElement(el));
-            // 滚动回顶部
-            window.scrollTo(0, 0);
+            
+            const renderTarget = document.getElementById('md-render');
+            renderTarget.innerHTML = marked.parse(article.md || '');
+            
+            // 渲染数学公式和代码高亮
+            renderMathInElement(renderTarget, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}] });
+            renderTarget.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
         }
-    }
 
-    function showError(msg) {
-        document.getElementById('content-area').innerHTML = `
-            <div class="error-box">
-                <h3><i class="fas fa-exclamation-circle"></i> 出错了</h3>
-                <p>${msg}</p>
-            </div>
-        `;
-    }
+        async function showEditor(id = null) {
+            if(!currentUser) return alert("请先登录");
+            const content = document.getElementById('view-content');
+            const article = id ? allArticles.find(a => a.id == id) : { title: '', md: '', tag: '' };
 
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
+            content.innerHTML = `
+                <div class="editor-wrap">
+                    <h2>${id ? '编辑文章' : '新建文章'}</h2>
+                    <input id="editor-title" class="input-field" placeholder="文章标题" value="${escapeHtml(article.title)}">
+                    <textarea id="editor-md" class="input-field" placeholder="Markdown 内容...">${article.md}</textarea>
+                    <div style="display:flex; gap:10px">
+                        <button class="btn btn-primary" onclick="saveArticle('${id || ''}')">保存</button>
+                        ${id ? `<button class="btn btn-danger" onclick="deleteArticle('${id}')">删除</button>` : ''}
+                        <button class="btn" onclick="Router.go('/')">取消</button>
+                    </div>
+                </div>
+            `;
+        }
 
-    // 启动
-    window.onload = init;
-</script>
+        async function saveArticle(id) {
+            const title = document.getElementById('editor-title').value;
+            const md = document.getElementById('editor-md').value;
+            if(!title) return alert("标题不能为空");
 
+            const payload = { title, md, updated_at: new Date() };
+            let res;
+
+            if(id) {
+                res = await db.from('article').update(payload).eq('id', id);
+            } else {
+                payload.id = Math.random().toString(36).substr(2, 9);
+                res = await db.from('article').insert([payload]);
+                id = payload.id;
+            }
+
+            if(res.error) alert("保存失败: " + res.error.message);
+            else {
+                await fetchArticles();
+                Router.go('/article/' + id);
+            }
+        }
+
+        async function deleteArticle(id) {
+            if(!confirm("确定删除吗？")) return;
+            const { error } = await db.from('article').delete().eq('id', id);
+            if(!error) {
+                await fetchArticles();
+                Router.go('/');
+            }
+        }
+
+        // --- 辅助功能 ---
+        function updateAuthUI() {
+            const zone = document.getElementById('auth-ui');
+            if(currentUser) {
+                zone.innerHTML = `<button class="btn" style="color:white" onclick="db.auth.signOut().then(()=>location.reload())">退出登录</button>`;
+            } else {
+                zone.innerHTML = `<button class="btn" style="color:white" onclick="doLogin()">登录</button>`;
+            }
+        }
+
+        async function doLogin() {
+            const email = prompt("Email:");
+            const password = prompt("Password:");
+            const { error } = await db.auth.signInWithPassword({ email, password });
+            if(error) alert(error.message);
+            else location.reload();
+        }
+
+        function escapeHtml(str) {
+            const p = document.createElement('p');
+            p.textContent = str;
+            return p.innerHTML;
+        }
+
+        window.onload = init;
+    </script>
 </body>
 </html>
