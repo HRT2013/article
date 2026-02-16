@@ -1,116 +1,233 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HRT's Wiki</title>
     <link rel="icon" href="https://cdn.luogu.com.cn/upload/usericon/1057417.png" type="image/png">
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-light.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-light.min.css" id="hljs-theme">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
     <style>
         :root {
-            --primary: #3f51b5;
-            --text: #333;
-            --bg: #fff;
-            --code-bg: #f8f8f8;
-            --sidebar-w: 280px;
+            /* Apple Light Mode */
+            --bg-body: #ffffff;
+            --bg-sidebar: #f5f5f7;
+            --bg-card: #ffffff;
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --accent: #0066cc; /* Apple Blue */
+            --border: #d2d2d7;
+            --divider: #e5e5ea;
+            --glass: rgba(255, 255, 255, 0.8);
+            
+            /* 组件颜色 */
+            --code-bg: #f5f5f7;
+            --nav-hover: rgba(0,0,0,0.05);
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            
+            /* Admonition Colors */
+            --adm-note: #0066cc;
+            --adm-warn: #ff9500;
+            --adm-danger: #ff3b30;
+            
+            --header-h: 52px;
+            --sidebar-w: 260px;
+            --toc-w: 240px;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Roboto', sans-serif; background: #fafafa; color: var(--text); line-height: 1.6; display: flex; flex-direction: column; height: 100vh; }
-
-        /* 顶部导航 */
-        .header { height: 56px; background: var(--primary); color: #fff; display: flex; align-items: center; padding: 0 24px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 100; position: fixed; width: 100%; top: 0; }
-        .header-title { font-size: 1.2rem; font-weight: 500; cursor: pointer; display: flex; gap: 10px; align-items: center; }
-
-        /* 主容器 */
-        .container { display: flex; margin-top: 56px; height: calc(100vh - 56px); max-width: 1400px; margin: 56px auto 0; width: 100%; }
-
-        /* 侧边栏 */
-        .sidebar { width: var(--sidebar-w); background: #fff; border-right: 1px solid #eee; overflow-y: auto; padding: 20px 0; flex-shrink: 0; }
-        .nav-item { padding: 10px 24px; cursor: pointer; color: #555; font-size: 0.9rem; border-left: 4px solid transparent; }
-        .nav-item:hover { background: #f0f0f0; color: var(--primary); }
-        .nav-item.active { background: #e8eaf6; color: var(--primary); border-left-color: var(--primary); font-weight: 500; }
-        .nav-header { padding: 10px 24px; font-size: 0.8rem; font-weight: bold; color: #999; text-transform: uppercase; margin-top: 10px; }
-
-        /* 内容区 */
-        .main { flex: 1; padding: 40px 60px; overflow-y: auto; background: #fff; scroll-behavior: smooth; }
-        .article-body { max-width: 900px; margin: 0 auto; }
-        
-        /* 排版样式 */
-        h1 { font-size: 2.2rem; margin-bottom: 20px; font-weight: 300; line-height: 1.2; }
-        h2 { font-size: 1.6rem; margin: 40px 0 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; font-weight: 400; }
-        h3 { font-size: 1.3rem; margin: 30px 0 15px; font-weight: 500; }
-        p { margin-bottom: 16px; }
-        ul, ol { padding-left: 2em; margin-bottom: 16px; }
-        code { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.05); padding: 2px 5px; border-radius: 3px; font-size: 0.9em; }
-        pre { background: var(--code-bg); padding: 15px; border-radius: 4px; overflow-x: auto; margin: 1.5em 0; }
-        pre code { background: transparent; padding: 0; }
-
-        /* --- OI-Wiki 组件样式 --- */
-        
-        /* 1. 折叠框 (Admonition) */
-        .admonition { margin: 1.5em 0; border-left: 4px solid #448aff; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-radius: 4px; overflow: hidden; }
-        .admonition-title { 
-            background: rgba(68, 138, 255, 0.1); 
-            padding: 10px 16px; 
-            font-weight: bold; 
-            display: flex; 
-            align-items: center; 
-            cursor: pointer; 
-            user-select: none;
+        [data-theme="dark"] {
+            /* Apple Dark Mode */
+            --bg-body: #000000;
+            --bg-sidebar: #1c1c1e;
+            --bg-card: #1c1c1e;
+            --text-primary: #f5f5f7;
+            --text-secondary: #86868b;
+            --accent: #2997ff;
+            --border: #424245;
+            --divider: #38383a;
+            --glass: rgba(28, 28, 30, 0.8);
+            
+            --code-bg: #2c2c2e;
+            --nav-hover: rgba(255,255,255,0.1);
+            --shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
-        .admonition-title i { margin-right: 10px; color: #448aff; }
-        .admonition-title::after { content: "\f078"; font-family: "Font Awesome 6 Free"; margin-left: auto; transition: 0.3s; font-size: 0.8em; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+            overflow-y: scroll; /* 防止滚动条跳动 */
+        }
+
+        /* --- 顶部磨砂导航栏 --- */
+        .header {
+            position: fixed; top: 0; width: 100%; height: var(--header-h);
+            background: var(--glass);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--divider);
+            z-index: 1000;
+            display: flex; align-items: center; padding: 0 24px;
+            transition: border-color 0.3s;
+        }
+        .header-inner { max-width: 1400px; margin: 0 auto; width: 100%; display: flex; align-items: center; justify-content: space-between; }
+        .logo { font-weight: 600; font-size: 1.1rem; letter-spacing: -0.01em; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        
+        .header-controls { display: flex; gap: 16px; align-items: center; }
+        .icon-btn { cursor: pointer; font-size: 1.1rem; color: var(--text-primary); opacity: 0.8; transition: 0.2s; background: none; border: none; }
+        .icon-btn:hover { opacity: 1; color: var(--accent); }
+
+        /* --- 布局容器 --- */
+        .layout {
+            display: grid;
+            grid-template-columns: var(--sidebar-w) 1fr var(--toc-w);
+            max-width: 1400px;
+            margin: var(--header-h) auto 0;
+            min-height: calc(100vh - var(--header-h));
+        }
+
+        /* 左侧导航 */
+        .sidebar {
+            position: sticky; top: var(--header-h); height: calc(100vh - var(--header-h));
+            overflow-y: auto; padding: 30px 20px;
+            border-right: 1px solid var(--divider);
+            background: var(--bg-body); /* 在大屏模式下保持与背景一致更像Apple */
+        }
+        .nav-group-title { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin: 20px 0 10px 10px; }
+        .nav-item {
+            display: block; padding: 8px 12px; border-radius: 8px;
+            color: var(--text-primary); text-decoration: none; font-size: 0.9rem; font-weight: 500;
+            transition: 0.2s; cursor: pointer; margin-bottom: 2px;
+        }
+        .nav-item:hover { background: var(--nav-hover); }
+        .nav-item.active { background: var(--nav-hover); color: var(--accent); }
+
+        /* 中间内容区 */
+        .main-content { padding: 40px 60px; min-width: 0; }
+        
+        /* 右侧大纲 (TOC) */
+        .toc-sidebar {
+            position: sticky; top: var(--header-h); height: calc(100vh - var(--header-h));
+            overflow-y: auto; padding: 40px 20px;
+            border-left: 1px solid transparent; /* 视觉上更干净 */
+        }
+        .toc-title { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 15px; text-transform: uppercase; }
+        .toc-list { list-style: none; position: relative; }
+        .toc-list li { margin-bottom: 8px; }
+        .toc-link {
+            display: block; text-decoration: none; color: var(--text-secondary);
+            font-size: 0.85rem; padding-left: 10px; border-left: 2px solid var(--divider);
+            transition: 0.2s; line-height: 1.4;
+        }
+        .toc-link:hover { color: var(--text-primary); }
+        .toc-link.active { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+        .toc-link.h3 { padding-left: 24px; font-size: 0.8rem; }
+
+        /* --- 文章排版 (Apple Style) --- */
+        h1 { font-size: 2.5rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.5em; line-height: 1.1; }
+        h2 { font-size: 1.8rem; font-weight: 600; letter-spacing: -0.015em; margin: 2em 0 0.8em; padding-bottom: 0.3em; border-bottom: 1px solid var(--divider); scroll-margin-top: 80px; }
+        h3 { font-size: 1.4rem; font-weight: 600; margin: 1.5em 0 0.8em; scroll-margin-top: 80px; }
+        p { margin-bottom: 1.2em; font-size: 1.05rem; font-weight: 400; color: var(--text-primary); opacity: 0.95; }
+        code { font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.9em; background: var(--nav-hover); padding: 2px 6px; border-radius: 6px; color: var(--accent); }
+        pre { background: var(--code-bg); padding: 20px; border-radius: 12px; overflow-x: auto; margin: 1.5em 0; border: 1px solid var(--divider); }
+        pre code { background: transparent; padding: 0; color: inherit; }
+        blockquote { border-left: 4px solid var(--accent); margin: 1.5em 0; padding-left: 1em; color: var(--text-secondary); font-style: italic; }
+        img { max-width: 100%; border-radius: 12px; box-shadow: var(--shadow); margin: 1em 0; }
+
+        /* --- 组件: 折叠框 (Admonition) --- */
+        .admonition {
+            margin: 1.5em 0; border-radius: 12px; overflow: hidden;
+            border: 1px solid var(--divider); background: var(--bg-card);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .admonition-title {
+            padding: 12px 16px; font-weight: 600; font-size: 0.95rem;
+            display: flex; align-items: center; cursor: pointer; user-select: none;
+            background: var(--nav-hover); border-bottom: 1px solid var(--divider);
+        }
+        .admonition-title i { margin-right: 10px; }
+        .admonition-title::after { content: "\f078"; font-family: "Font Awesome 6 Free"; margin-left: auto; transition: 0.3s; font-size: 0.8em; opacity: 0.5; }
         .admonition.collapsed .admonition-title::after { transform: rotate(-90deg); }
-        .admonition-content { padding: 16px 20px; border-top: 1px solid rgba(0,0,0,0.05); }
+        .admonition-content { padding: 20px; }
         .admonition.collapsed .admonition-content { display: none; }
-        
-        /* 不同类型配色 */
-        .admonition.note { border-color: #448aff; } .admonition.note .admonition-title { background: rgba(68,138,255,0.1); }
-        .admonition.warning { border-color: #ff9800; } .admonition.warning .admonition-title { background: rgba(255,152,0,0.1); } .admonition.warning i { color: #ff9800; }
-        .admonition.failure, .admonition.danger { border-color: #f44336; } .admonition.failure .admonition-title { background: rgba(244,67,54,0.1); } .admonition.failure i { color: #f44336; }
-        
-        /* 2. 选项卡 (Tabs) */
-        .tab-group { margin: 1.5em 0; border: 1px solid #eee; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
-        .tab-labels { display: flex; background: #f5f5f5; border-bottom: 1px solid #ddd; overflow-x: auto; }
-        .tab-label { padding: 10px 20px; cursor: pointer; font-size: 0.9rem; color: #666; border-bottom: 2px solid transparent; transition: 0.2s; white-space: nowrap; }
-        .tab-label:hover { background: rgba(0,0,0,0.03); }
-        .tab-label.active { color: var(--primary); border-bottom-color: var(--primary); background: #fff; font-weight: 500; }
-        .tab-content { display: none; padding: 20px; background: #fff; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s; }
-        
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* 颜色变体 */
+        .admonition.note .admonition-title { color: var(--adm-note); }
+        .admonition.warning .admonition-title { color: var(--adm-warn); }
+        .admonition.danger .admonition-title { color: var(--adm-danger); }
+
+        /* --- 组件: 选项卡 (Tabs) --- */
+        .tab-group { margin: 1.5em 0; border: 1px solid var(--divider); border-radius: 12px; overflow: hidden; background: var(--bg-card); }
+        .tab-labels { display: flex; background: var(--nav-hover); border-bottom: 1px solid var(--divider); padding: 0 4px; }
+        .tab-label {
+            padding: 10px 20px; cursor: pointer; font-size: 0.9rem; font-weight: 500; color: var(--text-secondary);
+            position: relative; transition: 0.2s;
+        }
+        .tab-label:hover { color: var(--text-primary); }
+        .tab-label.active { color: var(--text-primary); }
+        .tab-label.active::after {
+            content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px;
+            background: var(--accent); border-radius: 2px 2px 0 0;
+        }
+        .tab-content { display: none; padding: 20px; animation: fadeSafe 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeSafe { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* 编辑器 */
-        .editor-wrap { display: flex; flex-direction: column; height: 100%; }
-        .editor-input { padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; width: 100%; font-size: 1rem; }
-        .editor-area { flex: 1; padding: 15px; border: 1px solid #ddd; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.5; resize: none; }
-        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; margin-right: 10px; }
-        .btn-primary { background: var(--primary); color: #fff; }
+        .editor-wrap { max-width: 800px; margin: 0 auto; }
+        .input-title { width: 100%; font-size: 2rem; border: none; background: transparent; color: var(--text-primary); font-weight: 700; margin-bottom: 20px; font-family: inherit; }
+        .input-title::placeholder { color: var(--text-secondary); opacity: 0.5; }
+        .input-md { width: 100%; min-height: 60vh; border: none; background: transparent; color: var(--text-primary); resize: none; font-family: "SF Mono", monospace; font-size: 1rem; line-height: 1.6; }
+        
+        .btn { padding: 8px 20px; border-radius: 20px; border: none; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: 0.2s; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { opacity: 0.9; transform: scale(1.02); }
+        .btn-ghost { background: transparent; color: var(--text-secondary); }
+        .btn-ghost:hover { color: var(--text-primary); background: var(--nav-hover); }
 
+        /* 响应式 */
+        @media (max-width: 1100px) {
+            .toc-sidebar { display: none; }
+            .layout { grid-template-columns: var(--sidebar-w) 1fr; }
+        }
         @media (max-width: 768px) {
             .sidebar { display: none; }
-            .main { padding: 20px; }
+            .layout { grid-template-columns: 1fr; }
+            .main-content { padding: 30px 20px; }
         }
     </style>
 </head>
 <body>
 
     <header class="header">
-        <div class="header-title" onclick="Router.go('/')"><i class="fas fa-book-open"></i> HRT's Wiki</div>
-        <div id="auth-box" style="margin-left:auto"></div>
+        <div class="header-inner">
+            <div class="logo" onclick="Router.go('/')">
+                <i class="fab fa-apple"></i> HRT's HRT's HRT's HRT's Wiki
+            </div>
+            <div class="header-controls">
+                <button class="icon-btn" onclick="toggleTheme()" title="切换深色模式">
+                    <i class="fas fa-moon" id="theme-icon"></i>
+                </button>
+                <div id="auth-box"></div>
+            </div>
+        </div>
     </header>
 
-    <div class="container">
+    <div class="layout">
         <aside class="sidebar" id="sidebar-nav"></aside>
-        <main class="main" id="view-area"></main>
+        <main class="main-content" id="view-area"></main>
+        <aside class="toc-sidebar">
+            <div class="toc-title">ON THIS PAGE</div>
+            <ul class="toc-list" id="toc-list"></ul>
+        </aside>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -120,143 +237,117 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 
     <script>
-        // --- 1. Supabase 配置 ---
+        // --- 1. 系统设置：深色模式 ---
+        function initTheme() {
+            const saved = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', saved);
+            updateThemeIcon(saved);
+            updateHljsTheme(saved);
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const target = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', target);
+            localStorage.setItem('theme', target);
+            updateThemeIcon(target);
+            updateHljsTheme(target);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        function updateHljsTheme(theme) {
+            const link = document.getElementById('hljs-theme');
+            if (theme === 'dark') {
+                link.href = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css";
+            } else {
+                link.href = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-light.min.css";
+            }
+        }
+        initTheme();
+
+        // --- 2. Supabase ---
         const CONFIG = {
             URL: 'https://qalinnggueysnsfrmoux.supabase.co',
             KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhbGlubmdndWV5c25zZnJtb3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2ODUwNjgsImV4cCI6MjA4NjI2MTA2OH0.rlngJnOtXVs-Q1qXxN8iSrTCbjslJu0K_qouVsgOfj0'
         };
         const db = window.supabase.createClient(CONFIG.URL, CONFIG.KEY);
-        let currentUser = null;
-        let allArticles = [];
+        let currentUser = null, allArticles = [];
 
-        // --- 2. 核心解析器：分治法 (Divide & Render) ---
-        // 解决 "Marked 不渲染 HTML 内部 Markdown" 的问题的关键
-        
+        // --- 3. 核心：递归分治渲染器 (保持之前的逻辑以完美支持折叠) ---
         function parseAndRender(markdown) {
             if (!markdown) return '';
             const lines = markdown.split('\n');
-            let resultHTML = '';
-            let buffer = []; // 存储普通 Markdown 行
+            let resultHTML = '', buffer = [];
 
-            // 辅助：渲染并清空缓冲区
             const flushBuffer = () => {
-                if (buffer.length > 0) {
-                    resultHTML += marked.parse(buffer.join('\n'));
-                    buffer = [];
-                }
+                if (buffer.length) { resultHTML += marked.parse(buffer.join('\n')); buffer = []; }
             };
 
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i];
-                const indent = line.search(/\S|$/); // 获取缩进级别 (空格数)
-                const trimmed = line.trim();
-
-                // 识别折叠框: ???+ note "Title"
-                const admMatch = line.match(/^(\?{3}\+?)\s+(\w+)(?:\s+"([^"]+)")?/);
+                const indent = line.search(/\S|$/);
                 
-                // 识别选项卡: === "Title"
+                const admMatch = line.match(/^(\?{3}\+?)\s+(\w+)(?:\s+"([^"]+)")?/);
                 const tabMatch = line.match(/^===\s+"([^"]+)"/);
 
                 if (admMatch) {
                     flushBuffer();
-                    // 提取整个块
-                    let blockLines = [];
-                    let baseIndent = -1; 
-                    
-                    // 向下扫描直到缩进结束
+                    let blockLines = [], baseIndent = -1;
                     i++;
                     while (i < lines.length) {
-                        const nextLine = lines[i];
-                        const nextIndent = nextLine.search(/\S|$/);
-                        if (nextLine.trim() === '') {
-                            blockLines.push(''); // 保留空行
-                            i++;
-                            continue;
-                        }
-                        if (baseIndent === -1) baseIndent = nextIndent; // 确定内容的基础缩进
-                        
-                        // 如果遇到缩进比内容基础缩进还小的非空行，说明块结束了
-                        if (nextIndent < baseIndent) {
-                            i--; // 回退一行，交给外层循环处理
-                            break;
-                        }
-                        // 去除基础缩进
+                        const nextLine = lines[i], nextIndent = nextLine.search(/\S|$/);
+                        if (!nextLine.trim()) { blockLines.push(''); i++; continue; }
+                        if (baseIndent === -1) baseIndent = nextIndent;
+                        if (nextIndent < baseIndent) { i--; break; }
                         blockLines.push(nextLine.substring(baseIndent));
                         i++;
                     }
-                    
-                    // 递归渲染块内部内容！这是关键！
                     const innerHTML = parseAndRender(blockLines.join('\n'));
-                    
-                    // 组装 HTML
                     const [_, sym, type, title] = admMatch;
                     const isCollapsed = !sym.includes('+');
                     const displayTitle = title || type.toUpperCase();
                     let icon = 'fa-info-circle';
                     if (type === 'warning') icon = 'fa-exclamation-triangle';
-                    if (type === 'failure') icon = 'fa-times-circle';
+                    if (type === 'danger') icon = 'fa-bolt';
 
-                    resultHTML += `
-                        <div class="admonition ${type} ${isCollapsed ? 'collapsed' : ''}">
-                            <div class="admonition-title" onclick="this.parentElement.classList.toggle('collapsed')">
-                                <i class="fas ${icon}"></i> ${displayTitle}
-                            </div>
-                            <div class="admonition-content">${innerHTML}</div>
-                        </div>`;
-                    
-                } else if (tabMatch) {
+                    resultHTML += `<div class="admonition ${type} ${isCollapsed ? 'collapsed' : ''}"><div class="admonition-title" onclick="this.parentElement.classList.toggle('collapsed')"><i class="fas ${icon}"></i>${displayTitle}</div><div class="admonition-content">${innerHTML}</div></div>`;
+                } 
+                else if (tabMatch) {
                     flushBuffer();
-                    // 选项卡通常是成组出现的，我们需要收集连续的 Tab 块
                     let tabs = [];
-                    
-                    // 回退一行以便进入循环统一处理
-                    i--; 
+                    i--;
                     while (i + 1 < lines.length) {
-                        const nextHeaderLine = lines[i + 1];
-                        const nextTabMatch = nextHeaderLine.match(/^===\s+"([^"]+)"/);
-                        if (!nextTabMatch) break; // 下一行不是 Tab 头，结束组
-                        
-                        i++; // 消费 Header 行
-                        const tabTitle = nextTabMatch[1];
-                        let tabContentLines = [];
-                        let tabBaseIndent = -1;
-
-                        // 消费 Content
+                        const nextHeader = lines[i+1];
+                        const nextMatch = nextHeader.match(/^===\s+"([^"]+)"/);
+                        if (!nextMatch) break;
                         i++;
-                        while (i < lines.length) {
-                            const nextContentLine = lines[i];
-                            const nextIndent = nextContentLine.search(/\S|$/);
-                            if (nextContentLine.trim() === '') {
-                                tabContentLines.push('');
-                                i++; continue;
-                            }
-                            if (tabBaseIndent === -1) tabBaseIndent = nextIndent;
-                            
-                            if (nextIndent < tabBaseIndent) {
-                                i--; // 回退
-                                break;
-                            }
-                            tabContentLines.push(nextContentLine.substring(tabBaseIndent));
+                        const tabTitle = nextMatch[1];
+                        let tabContent = [], tabBaseIndent = -1;
+                        i++;
+                        while(i < lines.length) {
+                            const nl = lines[i], ni = nl.search(/\S|$/);
+                            if(!nl.trim()) { tabContent.push(''); i++; continue; }
+                            if(tabBaseIndent === -1) tabBaseIndent = ni;
+                            if(ni < tabBaseIndent) { i--; break; }
+                            tabContent.push(nl.substring(tabBaseIndent));
                             i++;
                         }
-                        tabs.push({ title: tabTitle, content: tabContentLines.join('\n') });
+                        tabs.push({title: tabTitle, content: tabContent.join('\n')});
                     }
-
-                    // 渲染整组 Tabs
-                    if (tabs.length > 0) {
-                        const uniqueId = Math.random().toString(36).substr(2, 9);
-                        let labelsHtml = '';
-                        let panesHtml = '';
-                        tabs.forEach((tab, idx) => {
-                            const active = idx === 0 ? 'active' : '';
-                            // 递归渲染 Tab 内部！
-                            const tabInnerHtml = parseAndRender(tab.content);
-                            labelsHtml += `<div class="tab-label ${active}" onclick="switchTab('${uniqueId}', ${idx})">${tab.title}</div>`;
-                            panesHtml += `<div class="tab-content ${active}" data-idx="${idx}">${tabInnerHtml}</div>`;
+                    if(tabs.length) {
+                        const uid = Math.random().toString(36).substr(2, 6);
+                        let lbls = '', panes = '';
+                        tabs.forEach((t, idx) => {
+                            const active = idx===0?'active':'';
+                            lbls += `<div class="tab-label ${active}" onclick="switchTab('${uid}', ${idx})">${t.title}</div>`;
+                            panes += `<div class="tab-content ${active}" data-idx="${idx}">${parseAndRender(t.content)}</div>`;
                         });
-                        resultHTML += `<div class="tab-group" id="tab-${uniqueId}"><div class="tab-labels">${labelsHtml}</div>${panesHtml}</div>`;
+                        resultHTML += `<div class="tab-group" id="tab-${uid}"><div class="tab-labels">${lbls}</div>${panes}</div>`;
                     }
-
                 } else {
                     buffer.push(line);
                 }
@@ -265,44 +356,55 @@
             return resultHTML;
         }
 
-        // 全局 Tab 切换函数
-        window.switchTab = function(groupId, tabIdx) {
-            const group = document.getElementById(`tab-${groupId}`);
-            const labels = group.querySelectorAll('.tab-label');
-            const contents = group.querySelectorAll('.tab-content');
-            
-            labels.forEach((l, i) => l.classList.toggle('active', i === tabIdx));
-            contents.forEach((c, i) => c.classList.toggle('active', i === tabIdx));
-        }
+        window.switchTab = (uid, idx) => {
+            const g = document.getElementById(`tab-${uid}`);
+            g.querySelectorAll('.tab-label').forEach((el, i) => el.classList.toggle('active', i===idx));
+            g.querySelectorAll('.tab-content').forEach((el, i) => el.classList.toggle('active', i===idx));
+        };
 
-        // --- 3. 页面渲染逻辑 ---
-        async function showDetail(id) {
-            const art = allArticles.find(a => a.id == id);
-            const container = document.getElementById('view-area');
-            if (!art) return container.innerHTML = "<h1>404</h1>";
-
-            // 使用我们强大的自定义渲染器
-            const htmlContent = parseAndRender(art.md || '');
-
-            container.innerHTML = `
-                <div class="article-body">
-                    <h1>${escapeHtml(art.title)}</h1>
-                    <div style="font-size:0.9rem; color:#888; margin-bottom:30px">
-                        ${new Date(art.created_at).toLocaleDateString()}
-                        ${currentUser ? ` · <a href="javascript:Router.go('/article/${id}/edit')">编辑</a>` : ''}
-                    </div>
-                    <div id="md-root">${htmlContent}</div>
-                </div>
-            `;
-
-            // 后置增强：数学公式和代码高亮
+        // --- 4. 功能：生成大纲 (TOC) ---
+        function generateTOC() {
             const root = document.getElementById('md-root');
-            renderMathInElement(root, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}] });
-            root.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
-            window.scrollTo(0,0);
+            const headers = root.querySelectorAll('h2, h3');
+            const list = document.getElementById('toc-list');
+            list.innerHTML = '';
+
+            if (headers.length === 0) {
+                list.innerHTML = '<li style="color:var(--text-secondary);font-size:0.8rem">暂无目录</li>';
+                return;
+            }
+
+            headers.forEach((header, index) => {
+                const id = 'heading-' + index;
+                header.id = id;
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.className = `toc-link ${header.tagName.toLowerCase()}`;
+                a.href = '#' + id;
+                a.innerText = header.innerText;
+                a.onclick = (e) => {
+                    e.preventDefault();
+                    document.getElementById(id).scrollIntoView({behavior: 'smooth'});
+                    history.pushState(null, null, '#' + id);
+                };
+                li.appendChild(a);
+                list.appendChild(li);
+            });
+
+            // ScrollSpy
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        document.querySelectorAll('.toc-link').forEach(l => l.classList.remove('active'));
+                        const activeLink = document.querySelector(`.toc-link[href="#${entry.target.id}"]`);
+                        if(activeLink) activeLink.classList.add('active');
+                    }
+                });
+            }, { rootMargin: '-100px 0px -60% 0px' });
+            headers.forEach(h => observer.observe(h));
         }
 
-        // --- 4. 路由系统 ---
+        // --- 5. 页面渲染 ---
         const Router = {
             get() {
                 const p = window.location.pathname;
@@ -311,6 +413,9 @@
             go(path) { window.history.pushState(null, '', path); this.handle(); },
             handle() {
                 const p = this.get();
+                // 重置视图
+                document.querySelector('.toc-sidebar').style.display = (p.isNew || p.isEdit) ? 'none' : 'block';
+                
                 if (p.isNew) renderEditor();
                 else if (p.id && p.isEdit) renderEditor(p.id);
                 else if (p.id) showDetail(p.id);
@@ -319,34 +424,30 @@
             }
         };
 
-        // --- 5. 辅助功能 ---
-        async function renderHome() {
-            const home = allArticles.find(a => a.id === 'home');
-            if (home) showDetail('home');
-            else document.getElementById('view-area').innerHTML = `
-                <div class="article-body">
-                    <h1>Wiki 已就绪</h1>
-                    <p>数据库中没有 ID 为 <code>home</code> 的文章。</p>
-                    ${currentUser ? `<button class="btn btn-primary" onclick="initHome()">初始化首页</button>` : ''}
-                </div>`;
-        }
-        
-        async function initHome() {
-            await db.from('article').insert([{ id: 'home', title: '首页', md: '???+ note "欢迎"\n    欢迎来到 Wiki！点击左侧编辑开始。', created_at: new Date() }]);
-            await fetchArticles(); Router.handle();
-        }
+        async function showDetail(id) {
+            const art = allArticles.find(a => a.id == id);
+            const container = document.getElementById('view-area');
+            if (!art) return container.innerHTML = "<h1>404</h1><p>页面未找到</p>";
 
-        function renderSidebar() {
-            const nav = document.getElementById('sidebar-nav');
-            const cur = Router.get().id;
-            let h = `<div class="nav-header">Menu</div>`;
-            h += `<div class="nav-item ${!cur?'active':''}" onclick="Router.go('/')">首页</div>`;
-            if (currentUser) h += `<div class="nav-item" style="color:var(--primary)" onclick="Router.go('/article/new')">+ 新建文章</div>`;
-            h += `<div class="nav-header">Articles</div>`;
-            allArticles.filter(a => a.id !== 'home').forEach(a => {
-                h += `<div class="nav-item ${cur==a.id?'active':''}" onclick="Router.go('/article/${a.id}')">${escapeHtml(a.title)}</div>`;
-            });
-            nav.innerHTML = h;
+            const htmlContent = parseAndRender(art.md || '');
+
+            container.innerHTML = `
+                <div style="margin-bottom:20px">
+                    <h1>${escapeHtml(art.title)}</h1>
+                    <div style="font-size:0.9rem; color:var(--text-secondary);">
+                        ${new Date(art.created_at).toLocaleDateString()} 
+                        ${currentUser ? ` · <a href="javascript:Router.go('/article/${id}/edit')" style="color:var(--accent)">编辑</a>` : ''}
+                    </div>
+                </div>
+                <div id="md-root">${htmlContent}</div>
+            `;
+
+            const root = document.getElementById('md-root');
+            renderMathInElement(root, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}] });
+            root.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+            
+            generateTOC();
+            window.scrollTo(0, 0);
         }
 
         async function renderEditor(id=null) {
@@ -354,37 +455,57 @@
             const art = id ? allArticles.find(a => a.id == id) : { title: '', md: '' };
             document.getElementById('view-area').innerHTML = `
                 <div class="editor-wrap">
-                    <h2>${id?'编辑':'新建'}</h2>
-                    <input id="ed-title" class="editor-input" value="${escapeHtml(art.title)}" placeholder="标题">
-                    <textarea id="ed-md" class="editor-area" placeholder="Markdown content...">${art.md}</textarea>
-                    <div style="margin-top:15px">
-                        <button class="btn btn-primary" onclick="saveArt('${id||''}')">保存</button>
-                        <button class="btn" onclick="Router.go('/')" style="background:#eee">取消</button>
+                    <input id="ed-title" class="input-title" value="${escapeHtml(art.title)}" placeholder="在此输入标题">
+                    <textarea id="ed-md" class="input-md" placeholder="开始写作... (支持 Markdown, LaTeX, 折叠块, 选项卡)">${art.md}</textarea>
+                    <div style="margin-top:20px; display:flex; gap:10px;">
+                        <button class="btn btn-primary" onclick="saveArt('${id||''}')">发布文章</button>
+                        <button class="btn btn-ghost" onclick="Router.go('/')">取消</button>
                     </div>
                 </div>`;
+            document.getElementById('toc-list').innerHTML = ''; // 清空目录
         }
 
-        async function saveArt(id) {
-            const title = document.getElementById('ed-title').value;
-            const md = document.getElementById('ed-md').value;
-            const finalId = id || Math.random().toString(36).substr(2, 12);
-            const payload = { id: finalId, title, md, updated_at: new Date() };
-            const { error } = id ? await db.from('article').update(payload).eq('id', id) : await db.from('article').insert([payload]);
-            if (error) alert(error.message); else { await fetchArticles(); Router.go(finalId==='home'?'/':`/article/${finalId}`); }
-        }
-
+        // --- 6. 数据与侧边栏 ---
         async function fetchArticles() {
             const { data } = await db.from('article').select('*').order('created_at', { ascending: false });
             allArticles = data || [];
         }
 
+        function renderSidebar() {
+            const nav = document.getElementById('sidebar-nav');
+            const cur = Router.get().id;
+            let h = `<div class="nav-group-title">Menu</div>`;
+            h += `<a class="nav-item ${!cur?'active':''}" onclick="Router.go('/')"><i class="fas fa-home" style="width:20px"></i> 首页</a>`;
+            if (currentUser) h += `<a class="nav-item" onclick="Router.go('/article/new')"><i class="fas fa-plus" style="width:20px"></i> 新建文章</a>`;
+            h += `<div class="nav-group-title">Library</div>`;
+            allArticles.filter(a => a.id !== 'home').forEach(a => {
+                h += `<a class="nav-item ${cur==a.id?'active':''}" onclick="Router.go('/article/${a.id}')">${escapeHtml(a.title)}</a>`;
+            });
+            nav.innerHTML = h;
+        }
+
+        async function saveArt(id) {
+            const title = document.getElementById('ed-title').value;
+            const md = document.getElementById('ed-md').value;
+            const finalId = id || Math.random().toString(36).substr(2, 10);
+            const payload = { id: finalId, title, md, updated_at: new Date() };
+            const { error } = id ? await db.from('article').update(payload).eq('id', id) : await db.from('article').insert([payload]);
+            if (error) alert(error.message); else { await fetchArticles(); Router.go(finalId==='home'?'/':`/article/${finalId}`); }
+        }
+
+        // --- 7. 认证与初始化 ---
         async function checkAuth() {
             const { data } = await db.auth.getSession();
             currentUser = data.session?.user;
             document.getElementById('auth-box').innerHTML = currentUser ? 
-                `<span onclick="db.auth.signOut().then(()=>location.reload())" style="cursor:pointer;font-size:0.9rem">退出</span>` : 
-                `<span onclick="login()" style="cursor:pointer;font-size:0.9rem">登录</span>`;
+                `<button class="btn btn-ghost" onclick="db.auth.signOut().then(()=>location.reload())" style="font-size:0.85rem">退出</button>` : 
+                `<button class="btn btn-primary" onclick="login()" style="padding:6px 16px; border-radius:16px;">登录</button>`;
         }
+        async function renderHome() {
+            const home = allArticles.find(a => a.id === 'home');
+            home ? showDetail('home') : document.getElementById('view-area').innerHTML = '<div style="text-align:center; padding:50px"><h1>Welcome</h1><p>HRT's HRT's HRT's Wiki 已准备就绪</p>' + (currentUser ? '<button class="btn btn-primary" onclick="initHome()">初始化首页</button>' : '') + '</div>';
+        }
+        async function initHome() { await db.from('article').insert([{ id: 'home', title: '首页', md: '???+ note "Welcome"\n    Hello World!', created_at: new Date() }]); await fetchArticles(); Router.handle(); }
         async function login() { const e=prompt("Email"), p=prompt("Password"); if(e&&p) await db.auth.signInWithPassword({email:e,password:p}).then(()=>location.reload()); }
         function escapeHtml(s) { const d = document.createElement('div'); d.innerText = s; return d.innerHTML; }
 
