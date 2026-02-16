@@ -6,274 +6,527 @@
     <title>HRT's Wiki</title>
     <link rel="icon" href="https://cdn.luogu.com.cn/upload/usericon/1057417.png" type="image/png">
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-light.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+
+    <style>
+        :root {
+            /* MkDocs Material 默认配色 (Indigo / Indigo) */
+            --md-primary-fg-color: #3f51b5;
+            --md-primary-bg-color: #ffffff;
+            --md-default-fg-color: #333333;
+            --md-default-bg-color: #ffffff;
+            --md-code-bg-color: #f5f5f5;
+            --md-admonition-bg-color: #fff;
+            
+            /* 侧边栏宽度 */
+            --md-sidebar-width: 260px;
+            --header-height: 48px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--md-default-fg-color);
+            background-color: #f6f6f6; /* 页面背景微灰，内容区纯白 */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* 顶部导航栏 */
+        .md-header {
+            background-color: var(--md-primary-fg-color);
+            color: #fff;
+            height: var(--header-height);
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .md-header__title { font-weight: 700; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .md-header__auth { margin-left: auto; font-size: 0.9rem; opacity: 0.9; }
+
+        /* 主容器 */
+        .md-container {
+            margin-top: var(--header-height);
+            display: flex;
+            max-width: 1220px;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            flex: 1;
+        }
+
+        /* 侧边栏 */
+        .md-sidebar {
+            width: var(--md-sidebar-width);
+            height: calc(100vh - var(--header-height));
+            position: sticky;
+            top: var(--header-height);
+            overflow-y: auto;
+            background: #fff;
+            border-right: 1px solid #e0e0e0;
+            padding: 10px 0;
+        }
+        
+        .nav-title { padding: 10px 16px; font-size: 0.75rem; font-weight: 700; color: #777; text-transform: uppercase; }
+        .nav-item { display: block; padding: 8px 16px; color: #444; text-decoration: none; font-size: 0.9rem; border-left: 3px solid transparent; cursor: pointer; transition: 0.2s; }
+        .nav-item:hover { background-color: #f4f4f4; color: var(--md-primary-fg-color); }
+        .nav-item.active { border-left-color: var(--md-primary-fg-color); background-color: #e8eaf6; color: var(--md-primary-fg-color); font-weight: 500; }
+
+        /* 主要内容区 */
+        .md-content {
+            flex: 1;
+            padding: 40px;
+            background: #fff;
+            min-width: 0; /* 防止代码块撑爆布局 */
+        }
+        
+        /* 文章排版样式 (Mimic MkDocs) */
+        .article-content h1 { font-size: 2em; font-weight: 300; margin-bottom: 20px; color: #222; letter-spacing: -0.01em; line-height: 1.3; }
+        .article-content h2 { font-size: 1.5em; font-weight: 400; margin: 40px 0 16px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        .article-content h3 { font-size: 1.25em; font-weight: 600; margin: 32px 0 16px; }
+        .article-content p { margin-bottom: 16px; }
+        .article-content ul, .article-content ol { padding-left: 2em; margin-bottom: 16px; }
+        .article-content code { font-family: 'Roboto Mono', monospace; background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 2px; font-size: 0.85em; }
+        .article-content pre { background: var(--md-code-bg-color); padding: 16px; border-radius: 2px; overflow-x: auto; line-height: 1.4; margin: 1em 0; }
+        .article-content pre code { background: transparent; padding: 0; font-size: 0.85em; }
+        
+        /* --- MkDocs 扩展组件样式 --- */
+
+        /* 1. Admonition (折叠框) */
+        .admonition {
+            margin: 1.5625em 0;
+            padding: 0;
+            border-left: 0.2rem solid #448aff;
+            background-color: var(--md-admonition-bg-color);
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12), 0 3px 1px -2px rgba(0,0,0,.2);
+            border-radius: 2px;
+            overflow: hidden;
+            font-size: 0.9rem;
+        }
+        .admonition-title {
+            background-color: rgba(68,138,255,.1);
+            font-weight: 700;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        .admonition-title i { margin-right: 8px; color: #448aff; }
+        .admonition-title::after { content: "\f078"; font-family: "Font Awesome 6 Free"; margin-left: auto; transition: transform 0.25s; font-size: 0.8em; }
+        .admonition.collapsed .admonition-title::after { transform: rotate(-90deg); }
+        
+        .admonition-content { padding: 16px; border-top: 1px solid rgba(68,138,255,.1); }
+        .admonition.collapsed .admonition-content { display: none; }
+
+        /* 不同类型的颜色 */
+        .admonition.note { border-left-color: #448aff; } .admonition.note .admonition-title { background: rgba(68,138,255,0.1); } .admonition.note .admonition-title i { color: #448aff; }
+        .admonition.tip { border-left-color: #00bfa5; } .admonition.tip .admonition-title { background: rgba(0,191,165,0.1); } .admonition.tip .admonition-title i { color: #00bfa5; }
+        .admonition.warning { border-left-color: #ff9100; } .admonition.warning .admonition-title { background: rgba(255,145,0,0.1); } .admonition.warning .admonition-title i { color: #ff9100; }
+        .admonition.danger { border-left-color: #ff1744; } .admonition.danger .admonition-title { background: rgba(255,23,68,0.1); } .admonition.danger .admonition-title i { color: #ff1744; }
+
+        /* 2. Tabs (选项卡) */
+        .tabbed-set {
+            margin: 1em 0;
+            border-radius: 2px;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12), 0 3px 1px -2px rgba(0,0,0,.2);
+            background: #fff;
+            display: flex; flex-direction: column;
+        }
+        .tabbed-labels {
+            display: flex;
+            background: #f0f0f0;
+            border-bottom: 1px solid #ddd;
+            overflow-x: auto;
+        }
+        .tabbed-label {
+            padding: 12px 24px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #777;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .tabbed-label:hover { color: var(--md-primary-fg-color); }
+        .tabbed-label.active { color: var(--md-primary-fg-color); border-bottom-color: var(--md-primary-fg-color); background: #fff; }
+        
+        .tabbed-content { display: none; padding: 16px; border-top: none; }
+        .tabbed-content.active { display: block; animation: fadein 0.3s; }
+        @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+
+        /* 编辑器样式 */
+        .editor-container { max-width: 900px; margin: 0 auto; }
+        .editor-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 2px; font-family: inherit; }
+        .editor-textarea { width: 100%; min-height: 600px; padding: 15px; border: 1px solid #ddd; border-radius: 2px; font-family: 'Roboto Mono', monospace; line-height: 1.5; resize: vertical; }
+
+        /* 按钮 */
+        .md-btn { display: inline-block; padding: 6px 16px; font-weight: 500; text-transform: uppercase; border-radius: 2px; border: none; cursor: pointer; transition: 0.2s; font-size: 0.85rem; }
+        .md-btn-primary { background-color: var(--md-primary-fg-color); color: white; box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12); }
+        .md-btn-primary:hover { background-color: #303f9f; }
+        .md-btn-flat { background: transparent; color: var(--md-default-fg-color); }
+        .md-btn-flat:hover { background: rgba(0,0,0,0.05); }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .md-sidebar { display: none; } /* 移动端暂时隐藏侧边栏 */
+            .md-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="md-header">
+        <div class="md-header__title" onclick="Router.go('/')">
+            <i class="fas fa-book-open"></i> HRT's Wiki
+        </div>
+        <div class="md-header__auth" id="auth-ui"></div>
+    </header>
+
+    <div class="md-container">
+        <aside class="md-sidebar" id="sidebar-nav"></aside>
+        <main class="md-content" id="main-view"></main>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 
-    <style>
-        :root { --md-primary: #3f51b5; --bg: #ffffff; --sidebar-bg: #f8f9fb; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; background: var(--bg); color: #333; line-height: 1.6; }
-
-        /* 布局 */
-        .header { background: var(--md-primary); color: #fff; height: 56px; display: flex; align-items: center; padding: 0 24px; position: fixed; width: 100%; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .container { display: flex; margin-top: 56px; max-width: 1300px; margin-left: auto; margin-right: auto; min-height: calc(100vh - 56px); }
-        .sidebar { width: 260px; background: var(--sidebar-bg); border-right: 1px solid #eee; position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; padding: 20px 0; }
-        .main { flex: 1; padding: 40px; min-width: 0; }
-
-        /* 侧边栏项 */
-        .nav-item { display: block; padding: 10px 24px; color: #444; text-decoration: none; cursor: pointer; border-left: 4px solid transparent; transition: 0.2s; }
-        .nav-item:hover { background: #eee; }
-        .nav-item.active { background: #e8eaf6; color: var(--md-primary); border-left-color: var(--md-primary); font-weight: bold; }
-
-        /* --- OI-Wiki 扩展组件样式 --- */
-        /* 折叠框 */
-        .admonition { margin: 1.5em 0; border: 1px solid #448aff; border-left-width: 0.3rem; border-radius: 4px; overflow: hidden; }
-        .admonition-title { background: rgba(68,138,255,0.1); padding: 12px 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; }
-        .admonition-title::after { content: "\f078"; font-family: "Font Awesome 6 Free"; margin-left: auto; transition: 0.3s; }
-        .admonition.collapsed .admonition-title::after { transform: rotate(-90deg); }
-        .admonition.collapsed .admonition-content { display: none; }
-        .admonition-content { padding: 16px; background: #fff; }
-
-        /* 选项卡 */
-        .tab-container { margin: 1.5em 0; border: 1px solid #eee; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .tab-nav { display: flex; background: #f8f9fb; border-bottom: 1px solid #eee; overflow-x: auto; }
-        .tab-btn { padding: 12px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #666; border-bottom: 2px solid transparent; white-space: nowrap; }
-        .tab-btn.active { color: var(--md-primary); border-bottom-color: var(--md-primary); font-weight: bold; background: #fff; }
-        .tab-pane { display: none; padding: 20px; }
-        .tab-pane.active { display: block; }
-
-        /* 代码与内容 */
-        pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; margin: 1em 0; }
-        .article-content h1 { font-size: 2rem; margin-bottom: 0.5em; }
-        .article-content h2 { margin: 1.5em 0 0.5em; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .btn { padding: 8px 16px; border-radius: 4px; border: none; cursor: pointer; }
-        .btn-primary { background: var(--md-primary); color: white; }
-        textarea.input-field { width: 100%; min-height: 500px; padding: 15px; font-family: monospace; margin-top: 10px; border: 1px solid #ddd; }
-    </style>
-</head>
-<body>
-
-    <header class="header">
-        <div style="font-weight: bold; cursor: pointer" onclick="Router.go('/')">HRT's Wiki</div>
-        <div id="auth-ui" style="margin-left: auto"></div>
-    </header>
-
-    <div class="container">
-        <aside class="sidebar" id="sidebar-nav"></aside>
-        <main class="main" id="view-content"></main>
-    </div>
-
     <script>
-        // --- 1. 初始化 ---
+        // --- 1. Supabase 配置 ---
         const CONFIG = {
             URL: 'https://qalinnggueysnsfrmoux.supabase.co',
             KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhbGlubmdndWV5c25zZnJtb3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2ODUwNjgsImV4cCI6MjA4NjI2MTA2OH0.rlngJnOtXVs-Q1qXxN8iSrTCbjslJu0K_qouVsgOfj0'
         };
         const db = window.supabase.createClient(CONFIG.URL, CONFIG.KEY);
-        let currentUser = null, allArticles = [];
+        let currentUser = null;
+        let allArticles = [];
 
-        // --- 2. 核心：MkDocs 语法预处理器 ---
-        // 我们改用“占位符法”：将块定义转换成带特殊 class 的 DIV，让内容留在里面
-        function preProcessMd(md) {
-            const lines = md.split('\n');
+        // --- 2. 核心：智能 Markdown 解析器 ---
+        // 这个解析器通过计算每一行的缩进来决定块的范围
+        function parseMkDocsExtensions(markdown) {
+            const lines = markdown.split('\n');
             let output = [];
-            let stack = []; // 跟踪当前开启的 DIV 数量
+            let blockStack = []; // 栈：存储当前打开的块 { type: 'adm'|'tab', indent: 0 }
 
-            for (let line of lines) {
-                const adm = line.match(/^(\?{3}\+?)\s+(\w+)\s+"([^"]+)"/);
-                const tab = line.match(/^===\s+"([^"]+)"/);
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+                
+                // 计算当前行的缩进 (假设 Tab=4 空格)
+                const rawIndent = line.match(/^\s*/)[0];
+                const indentLevel = rawIndent.replace(/\t/g, '    ').length;
+                const trimmedLine = line.trim();
 
-                // 遇到定义，如果没缩进，说明是顶级块开始
-                if (adm || tab) {
-                    // 闭合之前的块（简单逻辑：顶级定义互斥）
-                    while(stack.length > 0) { output.push('</div></div>'); stack.pop(); }
-
-                    if (adm) {
-                        output.push(`<div class="adm-placeholder" data-type="${adm[2]}" data-title="${adm[3]}">`);
-                        stack.push('adm');
-                    } else {
-                        output.push(`<div class="tab-placeholder" data-title="${tab[1]}">`);
-                        stack.push('tab');
+                // 1. 检查是否需要闭合之前的块
+                // 如果当前行的缩进 < 栈顶块的缩进，说明那个块结束了
+                // 如果是空行，我们允许它留在块内（不闭合）
+                if (trimmedLine.length > 0) {
+                    while (blockStack.length > 0) {
+                        const top = blockStack[blockStack.length - 1];
+                        if (indentLevel < top.indent) {
+                            output.push('</div>'); // 闭合内容区
+                            if (top.type === 'adm') output.push('</div>'); // 闭合 Admonition 外壳
+                            blockStack.pop();
+                        } else {
+                            break;
+                        }
                     }
+                }
+
+                // 2. 检查新块定义
+                const admMatch = line.match(/^(\?{3}\+?)\s+(\w+)(?:\s+"([^"]+)")?/); // ???+ note "Title"
+                const tabMatch = line.match(/^===\s+"([^"]+)"/); // === "Title"
+
+                if (admMatch) {
+                    // 开启 Admonition
+                    const [_, sym, type, title] = admMatch;
+                    const isCollapsed = !sym.includes('+');
+                    const displayTitle = title || type.toUpperCase();
+                    // 映射图标
+                    let icon = 'fa-info-circle';
+                    if (type === 'tip') icon = 'fa-lightbulb';
+                    if (type === 'warning') icon = 'fa-exclamation-triangle';
+                    if (type === 'danger') icon = 'fa-bomb';
+
+                    output.push(`<div class="admonition ${type} ${isCollapsed ? 'collapsed' : ''}">`);
+                    output.push(`<div class="admonition-title" onclick="toggleAdm(this)"><i class="fas ${icon}"></i>${displayTitle}</div>`);
+                    output.push(`<div class="admonition-content">`);
+                    
+                    // 下一行的缩进必须比当前行深
+                    blockStack.push({ type: 'adm', indent: indentLevel + 1 }); // +1 只要比定义行深即可，通常是 +4
+                    continue;
+                } 
+                else if (tabMatch) {
+                    // 开启 Tab
+                    // 注意：这里我们只生成带有特殊标记的 div，后续由 postProcess 重组 DOM
+                    const title = tabMatch[1];
+                    output.push(`<div class="mkdocs-tab-item" data-title="${title}">`);
+                    blockStack.push({ type: 'tab', indent: indentLevel + 1 });
                     continue;
                 }
 
-                // 闭合逻辑：遇到非空、非缩进的行，且当前在块内
-                if (stack.length > 0 && line.trim().length > 0 && !line.startsWith(' ') && !line.startsWith('\t')) {
-                    output.push('</div></div>');
-                    stack.pop();
+                // 3. 普通行处理
+                // 如果在块内，去除该块的缩进前缀（为了让 Markdown 正确解析内部代码块）
+                if (blockStack.length > 0) {
+                    // 简单去除前4个空格或1个Tab
+                    output.push(line.replace(/^(\t|    )/, '')); 
+                } else {
+                    output.push(line);
                 }
-
-                output.push(line);
             }
-            while(stack.length > 0) { output.push('</div></div>'); stack.pop(); }
+
+            // 循环结束后，闭合所有剩余的块
+            while (blockStack.length > 0) {
+                const top = blockStack.pop();
+                output.push('</div>');
+                if (top.type === 'adm') output.push('</div>');
+            }
+
             return output.join('\n');
         }
 
-        // --- 3. 核心：DOM 重组逻辑 ---
+        // --- 3. DOM 后处理 (DOM 重组) ---
         function postProcessDOM(container) {
-            // A. 处理折叠框
-            container.querySelectorAll('.adm-placeholder').forEach(ph => {
-                const type = ph.dataset.type;
-                const title = ph.dataset.title;
-                const wrapper = document.createElement('div');
-                wrapper.className = `admonition ${type}`;
-                wrapper.innerHTML = `<div class="admonition-title">${title}</div><div class="admonition-content"></div>`;
-                
-                // 移动内容
-                const contentArea = wrapper.querySelector('.admonition-content');
-                while(ph.firstChild) contentArea.appendChild(ph.firstChild);
-                
-                ph.replaceWith(wrapper);
-                wrapper.querySelector('.admonition-title').onclick = () => wrapper.classList.toggle('collapsed');
-            });
+            // 重组选项卡：找到连续的 .mkdocs-tab-item 并包裹
+            const tabItems = Array.from(container.querySelectorAll('.mkdocs-tab-item'));
+            if (tabItems.length === 0) return;
 
-            // B. 处理选项卡
-            const tabPlaceholders = Array.from(container.querySelectorAll('.tab-placeholder'));
-            let currentGroup = [];
+            let group = [];
             
-            tabPlaceholders.forEach((ph, i) => {
-                currentGroup.push(ph);
-                const next = ph.nextElementSibling;
-                // 如果下一个不是占位符，说明这组 Tab 结束了
-                if (!next || !next.classList.contains('tab-placeholder')) {
-                    const tabContainer = document.createElement('div');
-                    tabContainer.className = 'tab-container';
-                    const nav = document.createElement('div');
-                    nav.className = 'tab-nav';
-                    tabContainer.appendChild(nav);
+            // 辅助函数：渲染一组 Tabs
+            const renderGroup = (items) => {
+                if (items.length === 0) return;
+                const setDiv = document.createElement('div');
+                setDiv.className = 'tabbed-set';
+                
+                const labelsDiv = document.createElement('div');
+                labelsDiv.className = 'tabbed-labels';
+                
+                items.forEach((item, idx) => {
+                    // 创建标签
+                    const label = document.createElement('div');
+                    label.className = `tabbed-label ${idx === 0 ? 'active' : ''}`;
+                    label.textContent = item.dataset.title;
+                    label.onclick = () => {
+                        // 切换 Active 状态
+                        setDiv.querySelectorAll('.tabbed-label').forEach(l => l.classList.remove('active'));
+                        setDiv.querySelectorAll('.tabbed-content').forEach(c => c.classList.remove('active'));
+                        label.classList.add('active');
+                        // 对应的 Content
+                        setDiv.children[idx + 1].classList.add('active'); // +1 因为第一个是 labelsDiv
+                    };
+                    labelsDiv.appendChild(label);
 
-                    currentGroup.forEach((item, idx) => {
-                        const title = item.dataset.title;
-                        const btn = document.createElement('button');
-                        btn.className = `tab-btn ${idx === 0 ? 'active' : ''}`;
-                        btn.innerText = title;
-                        
-                        const pane = document.createElement('div');
-                        pane.className = `tab-pane ${idx === 0 ? 'active' : ''}`;
-                        while(item.firstChild) pane.appendChild(item.firstChild);
+                    // 转换 Item 为 Content
+                    const content = document.createElement('div');
+                    content.className = `tabbed-content ${idx === 0 ? 'active' : ''}`;
+                    while (item.firstChild) content.appendChild(item.firstChild);
+                    setDiv.appendChild(content); // Content 紧跟在 Labels 后面被 append
+                });
+                
+                setDiv.prepend(labelsDiv); // Labels 放在最前
+                items[0].parentNode.insertBefore(setDiv, items[0]); // 插入 DOM
+                items.forEach(i => i.remove()); // 移除原始占位符
+            };
 
-                        btn.onclick = () => {
-                            tabContainer.querySelectorAll('.tab-btn, .tab-pane').forEach(el => el.classList.remove('active'));
-                            btn.classList.add('active');
-                            pane.classList.add('active');
-                        };
-
-                        nav.appendChild(btn);
-                        tabContainer.appendChild(pane);
-                    });
-                    
-                    currentGroup[0].parentNode.insertBefore(tabContainer, currentGroup[0]);
-                    currentGroup.forEach(g => g.remove());
-                    currentGroup = [];
+            for (let i = 0; i < tabItems.length; i++) {
+                const current = tabItems[i];
+                group.push(current);
+                
+                const next = current.nextElementSibling;
+                // 如果下一个不是 tab-item，或者不存在，说明这组结束了
+                if (!next || !next.classList.contains('mkdocs-tab-item')) {
+                    renderGroup(group);
+                    group = [];
                 }
-            });
+            }
         }
 
-        // --- 4. 路由与显示 ---
+        // 全局函数：切换折叠框
+        window.toggleAdm = function(el) {
+            el.parentElement.classList.toggle('collapsed');
+        }
+
+        // --- 4. 路由与页面逻辑 ---
         const Router = {
             get() {
-                const path = window.location.pathname;
-                return { id: path.match(/\/article\/([^/]+)/)?.[1], isNew: path.endsWith('/new'), isEdit: path.endsWith('/edit') };
+                const p = window.location.pathname;
+                return { 
+                    id: p.match(/\/article\/([^/]+)/)?.[1], 
+                    isNew: p.endsWith('/new'), 
+                    isEdit: p.endsWith('/edit') 
+                };
             },
-            go(path) { window.history.pushState(null, '', path); this.handle(); },
+            go(path) { 
+                window.history.pushState(null, '', path); 
+                this.handle(); 
+            },
             handle() {
                 const p = this.get();
                 if (p.isNew) renderEditor();
                 else if (p.id && p.isEdit) renderEditor(p.id);
                 else if (p.id) renderDetail(p.id);
                 else renderHome();
-                updateSidebar();
+                renderSidebar();
             }
         };
 
+        // 渲染详情页
         async function renderDetail(id) {
             const art = allArticles.find(a => a.id == id);
-            if (!art) return;
-            const target = document.getElementById('view-content');
+            const container = document.getElementById('main-view');
             
-            // 渲染流程：预处理 -> Marked解析 -> 后置处理DOM
-            const processedHtml = marked.parse(preProcessMd(art.md || ''));
-            target.innerHTML = `<div class="article-content"><h1>${art.title}</h1><div id="render-area">${processedHtml}</div></div>`;
+            if (!art) {
+                container.innerHTML = "<h1>404 文章不存在</h1>";
+                return;
+            }
+
+            // 1. 预处理 (识别 ??? 和 ===)
+            const preProcessed = parseMkDocsExtensions(art.md || '');
+            // 2. Markdown 转 HTML
+            const html = marked.parse(preProcessed);
             
-            const renderArea = document.getElementById('render-area');
-            postProcessDOM(renderArea);
-            
-            // 数学公式与高亮
-            renderMathInElement(renderArea, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}] });
-            renderArea.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
-            window.scrollTo(0, 0);
+            container.innerHTML = `
+                <div class="article-content">
+                    <h1>${escapeHtml(art.title)}</h1>
+                    <div style="font-size:0.85rem; color:#888; margin-bottom: 2rem;">
+                        <i class="far fa-clock"></i> ${new Date(art.created_at).toLocaleDateString()}
+                        ${currentUser ? ` · <a href="javascript:Router.go('/article/${art.id}/edit')">编辑</a>` : ''}
+                    </div>
+                    <div id="md-render-target">${html}</div>
+                </div>
+            `;
+
+            // 3. 后处理 (重组 Tabs DOM)
+            const target = document.getElementById('md-render-target');
+            postProcessDOM(target);
+
+            // 4. 高亮与公式
+            renderMathInElement(target, { 
+                delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}] 
+            });
+            target.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+            window.scrollTo(0,0);
         }
 
-        async function renderHome() {
-            const home = allArticles.find(a => a.id === 'home');
-            home ? renderDetail('home') : document.getElementById('view-content').innerHTML = '<h1>欢迎使用 Wiki</h1><p>请在左侧选择或新建文章。</p>';
+        // 渲染侧边栏
+        function renderSidebar() {
+            const nav = document.getElementById('sidebar-nav');
+            const cur = Router.get().id;
+            
+            let html = `<div class="nav-title">Navigation</div>`;
+            html += `<a class="nav-item ${!cur ? 'active' : ''}" onclick="Router.go('/')">首页</a>`;
+            if (currentUser) {
+                html += `<a class="nav-item" style="color:var(--md-primary-fg-color)" onclick="Router.go('/article/new')">+ 新建文章</a>`;
+            }
+            
+            html += `<div class="nav-title" style="margin-top:20px">Content</div>`;
+            allArticles.filter(a => a.id !== 'home').forEach(a => {
+                html += `<a class="nav-item ${cur === a.id ? 'active' : ''}" onclick="Router.go('/article/${a.id}')">${escapeHtml(a.title)}</a>`;
+            });
+            nav.innerHTML = html;
         }
 
-        // --- 5. 编辑与保存 ---
-        function renderEditor(id = null) {
+        // 渲染编辑器
+        async function renderEditor(id = null) {
             if (!currentUser) return Router.go('/');
             const art = id ? allArticles.find(a => a.id == id) : { title: '', md: '' };
-            document.getElementById('view-content').innerHTML = `
-                <h2>${id ? '编辑文章' : '新建文章'}</h2>
-                <input id="ed-title" style="width:100%; padding:10px; margin:10px 0" value="${art.title}" placeholder="文章标题">
-                <textarea id="ed-md" class="input-field" placeholder="支持 MkDocs 语法 (???+, ===) 和 LaTeX">$${art.md}</textarea>
-                <div style="margin-top:10px">
-                    <button class="btn btn-primary" onclick="saveArt('${id || ''}')">发布文章</button>
-                    <button class="btn" onclick="Router.go('/')">取消</button>
+            
+            document.getElementById('main-view').innerHTML = `
+                <div class="editor-container">
+                    <h2 style="margin-bottom:20px">${id ? '编辑文章' : '新建文章'}</h2>
+                    <input id="ed-title" class="editor-input" placeholder="文章标题" value="${escapeHtml(art.title)}">
+                    <textarea id="ed-md" class="editor-textarea" placeholder="在此输入 Markdown...">${art.md}</textarea>
+                    <div style="margin-top:20px">
+                        <button class="md-btn md-btn-primary" onclick="saveArt('${id || ''}')">保存</button>
+                        ${id ? `<button class="md-btn md-btn-flat" style="color:red" onclick="delArt('${id}')">删除</button>` : ''}
+                        <button class="md-btn md-btn-flat" onclick="Router.go('/')">取消</button>
+                    </div>
                 </div>`;
         }
 
-        async function saveArt(id) {
-            const title = document.getElementById('ed-title').value;
-            const md = document.getElementById('ed-md').value;
-            let finalId = id || Math.random().toString(36).substr(2, 12);
-            const payload = { id: finalId, title, md, updated_at: new Date() };
-
-            const { error } = id ? await db.from('article').update(payload).eq('id', id) : await db.from('article').insert([payload]);
-            if (error) alert(error.message);
-            else { await fetchArticles(); Router.go(finalId === 'home' ? '/' : `/article/${finalId}`); }
-        }
-
-        // --- 6. 基础系统 ---
+        // 数据操作
         async function fetchArticles() {
             const { data } = await db.from('article').select('*').order('created_at', { ascending: false });
             allArticles = data || [];
         }
 
-        function updateSidebar() {
-            const nav = document.getElementById('sidebar-nav');
-            const cur = Router.get().id;
-            let h = `<div class="nav-item ${!cur?'active':''}" onclick="Router.go('/')">首页</div>`;
-            if (currentUser) h += `<div class="nav-item" style="color:green" onclick="Router.go('/article/new')">+ 新建文章</div>`;
-            h += `<div style="padding:20px 24px 5px; font-size:12px; color:#999">所有文章</div>`;
-            allArticles.filter(a => a.id !== 'home').forEach(a => {
-                h += `<div class="nav-item ${cur==a.id?'active':''}" onclick="Router.go('/article/${a.id}')">${a.title}</div>`;
-            });
-            nav.innerHTML = h;
+        async function saveArt(id) {
+            const title = document.getElementById('ed-title').value;
+            const md = document.getElementById('ed-md').value;
+            // 使用10位随机ID避免 varchar(8) 错误，如果数据库没改，请务必去改数据库类型！
+            const finalId = id || Math.random().toString(36).substr(2, 10);
+            
+            const payload = { id: finalId, title, md, updated_at: new Date() };
+            const { error } = id ? await db.from('article').update(payload).eq('id', id) : await db.from('article').insert([payload]);
+            
+            if (error) alert(error.message);
+            else { await fetchArticles(); Router.go(finalId === 'home' ? '/' : `/article/${finalId}`); }
         }
 
-        async function initAuth() {
+        async function delArt(id) {
+            if (!confirm("确定删除吗？")) return;
+            await db.from('article').delete().eq('id', id);
+            await fetchArticles();
+            Router.go('/');
+        }
+        
+        // 首页逻辑
+        async function renderHome() {
+            const home = allArticles.find(a => a.id === 'home');
+            if (home) renderDetail('home');
+            else document.getElementById('main-view').innerHTML = `
+                <div class="article-content">
+                    <h1>Welcome</h1>
+                    <p>数据库中没有 ID 为 <code>home</code> 的文章。</p>
+                    ${currentUser ? `<button class="md-btn md-btn-primary" onclick="initHome()">一键初始化首页</button>` : ''}
+                </div>`;
+        }
+
+        async function initHome() {
+            await db.from('article').insert([{ id: 'home', title: '首页', md: '???+ note "Welcome"\n    欢迎来到我的 Wiki！', created_at: new Date() }]);
+            await fetchArticles();
+            Router.handle();
+        }
+
+        // 认证
+        async function checkAuth() {
             const { data } = await db.auth.getSession();
             currentUser = data.session?.user;
-            document.getElementById('auth-ui').innerHTML = currentUser ? 
-                `<button class="btn" onclick="db.auth.signOut().then(()=>location.reload())">退出</button>` : 
-                `<button class="btn" onclick="login()">登录</button>`;
+            const ui = document.getElementById('auth-ui');
+            if (currentUser) {
+                ui.innerHTML = `<span onclick="db.auth.signOut().then(()=>location.reload())" style="cursor:pointer">退出</span>`;
+            } else {
+                ui.innerHTML = `<span onclick="login()" style="cursor:pointer">登录</span>`;
+            }
         }
 
         async function login() {
-            const e = prompt("Email:"), p = prompt("Password:");
+            const e = prompt("Email"), p = prompt("Password");
             if (e && p) await db.auth.signInWithPassword({email:e, password:p}).then(()=>location.reload());
         }
 
-        window.onload = async () => { await initAuth(); await fetchArticles(); Router.handle(); };
+        function escapeHtml(s) { const d = document.createElement('div'); d.innerText = s; return d.innerHTML; }
+
+        // 启动
+        window.onload = async () => { await checkAuth(); await fetchArticles(); Router.handle(); };
         window.onpopstate = () => Router.handle();
     </script>
 </body>
