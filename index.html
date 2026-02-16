@@ -17,89 +17,61 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 
     <style>
-        :root {
-            --md-primary-fg-color: #3f51b5;
-            --md-text-color: #333;
-            --sidebar-width: 280px;
-            --header-height: 54px;
-        }
-
-        /* 基础布局 */
+        :root { --md-primary: #3f51b5; --bg: #ffffff; --sidebar-bg: #f8f9fb; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Roboto', 'Noto Sans SC', sans-serif; background: #fff; line-height: 1.6; color: var(--md-text-color); }
+        body { font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; background: var(--bg); color: #333; line-height: 1.6; }
 
-        /* 导航头 */
-        .header { background: var(--md-primary-fg-color); color: white; height: var(--header-height); display: flex; align-items: center; padding: 0 24px; position: fixed; width: 100%; top: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .header-title { font-size: 1.2rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 12px; }
-        .auth-zone { margin-left: auto; }
+        /* 布局 */
+        .header { background: var(--md-primary); color: #fff; height: 56px; display: flex; align-items: center; padding: 0 24px; position: fixed; width: 100%; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .container { display: flex; margin-top: 56px; max-width: 1300px; margin-left: auto; margin-right: auto; min-height: calc(100vh - 56px); }
+        .sidebar { width: 260px; background: var(--sidebar-bg); border-right: 1px solid #eee; position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; padding: 20px 0; }
+        .main { flex: 1; padding: 40px; min-width: 0; }
 
-        /* 内容容器 */
-        .container { display: flex; margin-top: var(--header-height); max-width: 1400px; margin-left: auto; margin-right: auto; width: 100%; min-height: calc(100vh - var(--header-height)); }
-        
-        /* 侧边栏 */
-        .sidebar { width: var(--sidebar-width); background: #f8f9fb; border-right: 1px solid #eee; position: sticky; top: var(--header-height); height: calc(100vh - var(--header-height)); overflow-y: auto; padding: 20px 0; }
-        .nav-group-title { padding: 8px 24px; color: #999; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-        .nav-item { display: block; padding: 10px 24px; color: var(--md-text-color); text-decoration: none; font-size: 0.9rem; cursor: pointer; border-left: 4px solid transparent; }
+        /* 侧边栏项 */
+        .nav-item { display: block; padding: 10px 24px; color: #444; text-decoration: none; cursor: pointer; border-left: 4px solid transparent; transition: 0.2s; }
         .nav-item:hover { background: #eee; }
-        .nav-item.active { color: var(--md-primary-fg-color); border-left-color: var(--md-primary-fg-color); background: #e8eaf6; font-weight: 600; }
-
-        /* 主内容区 */
-        .main-content { flex: 1; padding: 40px 60px; min-width: 0; }
-        .article-content h1 { font-size: 2.2rem; margin-bottom: 20px; font-weight: 300; }
-        .article-content h2 { border-bottom: 1px solid #eee; padding-bottom: 8px; margin-top: 1.5em; }
+        .nav-item.active { background: #e8eaf6; color: var(--md-primary); border-left-color: var(--md-primary); font-weight: bold; }
 
         /* --- OI-Wiki 扩展组件样式 --- */
-        /* 折叠框 Admonitions */
-        .admonition { margin: 1.5em 0; border: 1px solid #448aff; border-left-width: 0.3rem; border-radius: 4px; background: #fff; overflow: hidden; }
-        .admonition-title { font-weight: bold; padding: 12px 16px; background: rgba(68, 138, 255, 0.08); display: flex; align-items: center; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .admonition-title::after { content: "\f078"; font-family: "Font Awesome 6 Free"; margin-left: auto; font-size: 0.8em; transition: 0.3s; }
+        /* 折叠框 */
+        .admonition { margin: 1.5em 0; border: 1px solid #448aff; border-left-width: 0.3rem; border-radius: 4px; overflow: hidden; }
+        .admonition-title { background: rgba(68,138,255,0.1); padding: 12px 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; }
+        .admonition-title::after { content: "\f078"; font-family: "Font Awesome 6 Free"; margin-left: auto; transition: 0.3s; }
         .admonition.collapsed .admonition-title::after { transform: rotate(-90deg); }
-        .admonition-content { padding: 16px; }
         .admonition.collapsed .admonition-content { display: none; }
-        .admonition.note { border-color: #448aff; }
-        .admonition.question { border-color: #00bcd4; }
-        .admonition.question .admonition-title { background: rgba(0, 188, 212, 0.1); }
+        .admonition-content { padding: 16px; background: #fff; }
 
-        /* 选项卡 Tabs */
-        .tab-container { margin: 1.5em 0; border: 1px solid #eee; border-radius: 6px; background: #fff; overflow: hidden; }
+        /* 选项卡 */
+        .tab-container { margin: 1.5em 0; border: 1px solid #eee; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .tab-nav { display: flex; background: #f8f9fb; border-bottom: 1px solid #eee; overflow-x: auto; }
-        .tab-btn { padding: 12px 24px; cursor: pointer; border: none; background: none; font-size: 0.9em; color: #666; border-bottom: 2px solid transparent; }
-        .tab-btn.active { color: var(--md-primary-fg-color); border-bottom-color: var(--md-primary-fg-color); background: #fff; font-weight: bold; }
+        .tab-btn { padding: 12px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #666; border-bottom: 2px solid transparent; white-space: nowrap; }
+        .tab-btn.active { color: var(--md-primary); border-bottom-color: var(--md-primary); font-weight: bold; background: #fff; }
         .tab-pane { display: none; padding: 20px; }
         .tab-pane.active { display: block; }
 
-        /* 编辑器 */
-        .editor-wrap { display: flex; flex-direction: column; gap: 15px; }
-        .input-field { padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; width: 100%; }
-        #ed-md { min-height: 600px; font-family: 'JetBrains Mono', monospace; line-height: 1.5; }
-
-        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
-        .btn-primary { background: var(--md-primary-fg-color); color: white; }
-        
-        pre { background: #f5f5f5; padding: 15px; border-radius: 4px; overflow-x: auto; margin: 1em 0; }
-
-        @media (max-width: 800px) {
-            .sidebar { display: none; }
-            .main-content { padding: 20px; }
-        }
+        /* 代码与内容 */
+        pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; margin: 1em 0; }
+        .article-content h1 { font-size: 2rem; margin-bottom: 0.5em; }
+        .article-content h2 { margin: 1.5em 0 0.5em; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .btn { padding: 8px 16px; border-radius: 4px; border: none; cursor: pointer; }
+        .btn-primary { background: var(--md-primary); color: white; }
+        textarea.input-field { width: 100%; min-height: 500px; padding: 15px; font-family: monospace; margin-top: 10px; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
 
     <header class="header">
-        <div class="header-title" onclick="Router.go('/')">
-            <i class="fas fa-book-open"></i> HRT's Wiki
-        </div>
-        <div class="auth-zone" id="auth-ui"></div>
+        <div style="font-weight: bold; cursor: pointer" onclick="Router.go('/')">HRT's Wiki</div>
+        <div id="auth-ui" style="margin-left: auto"></div>
     </header>
 
     <div class="container">
         <aside class="sidebar" id="sidebar-nav"></aside>
-        <main class="main-content" id="view-content"></main>
+        <main class="main" id="view-content"></main>
     </div>
 
     <script>
-        // --- 1. 配置与初始化 ---
+        // --- 1. 初始化 ---
         const CONFIG = {
             URL: 'https://qalinnggueysnsfrmoux.supabase.co',
             KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhbGlubmdndWV5c25zZnJtb3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2ODUwNjgsImV4cCI6MjA4NjI2MTA2OH0.rlngJnOtXVs-Q1qXxN8iSrTCbjslJu0K_qouVsgOfj0'
@@ -107,217 +79,201 @@
         const db = window.supabase.createClient(CONFIG.URL, CONFIG.KEY);
         let currentUser = null, allArticles = [];
 
-        // --- 2. 核心 Markdown 预处理器 (解决折叠/选项卡闭合问题) ---
-        function processMkDocsExtensions(md) {
+        // --- 2. 核心：MkDocs 语法预处理器 ---
+        // 我们改用“占位符法”：将块定义转换成带特殊 class 的 DIV，让内容留在里面
+        function preProcessMd(md) {
             const lines = md.split('\n');
-            let result = [];
-            let currentBlock = null; // 'admonition' or 'tab'
+            let output = [];
+            let stack = []; // 跟踪当前开启的 DIV 数量
 
-            for (let i = 0; i < lines.length; i++) {
-                let line = lines[i];
-                const admMatch = line.match(/^(\?{3}\+?)\s+(\w+)\s+"([^"]+)"/);
-                const tabMatch = line.match(/^===\s+"([^"]+)"/);
+            for (let line of lines) {
+                const adm = line.match(/^(\?{3}\+?)\s+(\w+)\s+"([^"]+)"/);
+                const tab = line.match(/^===\s+"([^"]+)"/);
 
-                // 遇到新块定义
-                if (admMatch || tabMatch) {
-                    // 如果之前有开启的块，先闭合它
-                    if (currentBlock) result.push('</div></div>');
-                    
-                    if (admMatch) {
-                        const [_, sym, type, title] = admMatch;
-                        result.push(`<div class="admonition ${type}"><div class="admonition-title">${title}</div><div class="admonition-content">`);
-                        currentBlock = 'admonition';
+                // 遇到定义，如果没缩进，说明是顶级块开始
+                if (adm || tab) {
+                    // 闭合之前的块（简单逻辑：顶级定义互斥）
+                    while(stack.length > 0) { output.push('</div></div>'); stack.pop(); }
+
+                    if (adm) {
+                        output.push(`<div class="adm-placeholder" data-type="${adm[2]}" data-title="${adm[3]}">`);
+                        stack.push('adm');
                     } else {
-                        const [_, title] = tabMatch;
-                        result.push(`<div class="raw-tab-pane" data-title="${title}">`);
-                        currentBlock = 'tab';
+                        output.push(`<div class="tab-placeholder" data-title="${tab[1]}">`);
+                        stack.push('tab');
                     }
                     continue;
                 }
 
-                // 核心闭合逻辑：如果当前在块内，遇到【非空行】且【不缩进】，说明块结束了
-                if (currentBlock && line.trim().length > 0 && !line.startsWith(' ') && !line.startsWith('\t')) {
-                    result.push('</div></div>');
-                    currentBlock = null;
+                // 闭合逻辑：遇到非空、非缩进的行，且当前在块内
+                if (stack.length > 0 && line.trim().length > 0 && !line.startsWith(' ') && !line.startsWith('\t')) {
+                    output.push('</div></div>');
+                    stack.pop();
                 }
 
-                result.push(line);
+                output.push(line);
             }
-            if (currentBlock) result.push('</div></div>');
-            return result.join('\n');
+            while(stack.length > 0) { output.push('</div></div>'); stack.pop(); }
+            return output.join('\n');
         }
 
-        // --- 3. UI 初始化 ---
-        function initAdmonitions(container) {
-            container.querySelectorAll('.admonition-title').forEach(t => {
-                t.onclick = (e) => {
-                    e.stopPropagation();
-                    t.parentElement.classList.toggle('collapsed');
-                };
+        // --- 3. 核心：DOM 重组逻辑 ---
+        function postProcessDOM(container) {
+            // A. 处理折叠框
+            container.querySelectorAll('.adm-placeholder').forEach(ph => {
+                const type = ph.dataset.type;
+                const title = ph.dataset.title;
+                const wrapper = document.createElement('div');
+                wrapper.className = `admonition ${type}`;
+                wrapper.innerHTML = `<div class="admonition-title">${title}</div><div class="admonition-content"></div>`;
+                
+                // 移动内容
+                const contentArea = wrapper.querySelector('.admonition-content');
+                while(ph.firstChild) contentArea.appendChild(ph.firstChild);
+                
+                ph.replaceWith(wrapper);
+                wrapper.querySelector('.admonition-title').onclick = () => wrapper.classList.toggle('collapsed');
             });
-        }
 
-        function initTabs(container) {
-            const panes = Array.from(container.querySelectorAll('.raw-tab-pane'));
-            if (panes.length === 0) return;
-
-            let group = [];
-            panes.forEach((pane, idx) => {
-                group.push(pane);
-                const next = pane.nextElementSibling;
-                // 如果下一个不是 pane 了，说明这一组选项卡到头了
-                if (!next || !next.classList.contains('raw-tab-pane')) {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'tab-container';
-                    pane.parentNode.insertBefore(wrapper, group[0]);
-                    
+            // B. 处理选项卡
+            const tabPlaceholders = Array.from(container.querySelectorAll('.tab-placeholder'));
+            let currentGroup = [];
+            
+            tabPlaceholders.forEach((ph, i) => {
+                currentGroup.push(ph);
+                const next = ph.nextElementSibling;
+                // 如果下一个不是占位符，说明这组 Tab 结束了
+                if (!next || !next.classList.contains('tab-placeholder')) {
+                    const tabContainer = document.createElement('div');
+                    tabContainer.className = 'tab-container';
                     const nav = document.createElement('div');
                     nav.className = 'tab-nav';
-                    wrapper.appendChild(nav);
+                    tabContainer.appendChild(nav);
 
-                    group.forEach((p, gIdx) => {
-                        const title = p.dataset.title;
+                    currentGroup.forEach((item, idx) => {
+                        const title = item.dataset.title;
                         const btn = document.createElement('button');
-                        btn.className = 'tab-btn' + (gIdx === 0 ? ' active' : '');
+                        btn.className = `tab-btn ${idx === 0 ? 'active' : ''}`;
                         btn.innerText = title;
                         
-                        const content = document.createElement('div');
-                        content.className = 'tab-pane' + (gIdx === 0 ? ' active' : '');
-                        while (p.firstChild) content.appendChild(p.firstChild); // 迁移内容
+                        const pane = document.createElement('div');
+                        pane.className = `tab-pane ${idx === 0 ? 'active' : ''}`;
+                        while(item.firstChild) pane.appendChild(item.firstChild);
 
                         btn.onclick = () => {
-                            nav.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                            wrapper.querySelectorAll('.tab-pane').forEach(c => c.classList.remove('active'));
+                            tabContainer.querySelectorAll('.tab-btn, .tab-pane').forEach(el => el.classList.remove('active'));
                             btn.classList.add('active');
-                            content.classList.add('active');
+                            pane.classList.add('active');
                         };
 
                         nav.appendChild(btn);
-                        wrapper.appendChild(content);
-                        p.remove();
+                        tabContainer.appendChild(pane);
                     });
-                    group = [];
+                    
+                    currentGroup[0].parentNode.insertBefore(tabContainer, currentGroup[0]);
+                    currentGroup.forEach(g => g.remove());
+                    currentGroup = [];
                 }
             });
         }
 
-        // --- 4. 路由与文章逻辑 ---
+        // --- 4. 路由与显示 ---
         const Router = {
-            getParams() {
-                const p = window.location.pathname;
-                return { id: p.match(/\/article\/([^/]+)/)?.[1], isNew: p.endsWith('/new'), isEdit: p.endsWith('/edit') };
+            get() {
+                const path = window.location.pathname;
+                return { id: path.match(/\/article\/([^/]+)/)?.[1], isNew: path.endsWith('/new'), isEdit: path.endsWith('/edit') };
             },
             go(path) { window.history.pushState(null, '', path); this.handle(); },
-            async handle() {
-                const p = this.getParams();
-                if (p.isNew) showEditor();
-                else if (p.id && p.isEdit) showEditor(p.id);
-                else if (p.id) showDetail(p.id);
-                else showHome();
-                renderSidebar();
+            handle() {
+                const p = this.get();
+                if (p.isNew) renderEditor();
+                else if (p.id && p.isEdit) renderEditor(p.id);
+                else if (p.id) renderDetail(p.id);
+                else renderHome();
+                updateSidebar();
             }
         };
 
+        async function renderDetail(id) {
+            const art = allArticles.find(a => a.id == id);
+            if (!art) return;
+            const target = document.getElementById('view-content');
+            
+            // 渲染流程：预处理 -> Marked解析 -> 后置处理DOM
+            const processedHtml = marked.parse(preProcessMd(art.md || ''));
+            target.innerHTML = `<div class="article-content"><h1>${art.title}</h1><div id="render-area">${processedHtml}</div></div>`;
+            
+            const renderArea = document.getElementById('render-area');
+            postProcessDOM(renderArea);
+            
+            // 数学公式与高亮
+            renderMathInElement(renderArea, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}] });
+            renderArea.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+            window.scrollTo(0, 0);
+        }
+
+        async function renderHome() {
+            const home = allArticles.find(a => a.id === 'home');
+            home ? renderDetail('home') : document.getElementById('view-content').innerHTML = '<h1>欢迎使用 Wiki</h1><p>请在左侧选择或新建文章。</p>';
+        }
+
+        // --- 5. 编辑与保存 ---
+        function renderEditor(id = null) {
+            if (!currentUser) return Router.go('/');
+            const art = id ? allArticles.find(a => a.id == id) : { title: '', md: '' };
+            document.getElementById('view-content').innerHTML = `
+                <h2>${id ? '编辑文章' : '新建文章'}</h2>
+                <input id="ed-title" style="width:100%; padding:10px; margin:10px 0" value="${art.title}" placeholder="文章标题">
+                <textarea id="ed-md" class="input-field" placeholder="支持 MkDocs 语法 (???+, ===) 和 LaTeX">$${art.md}</textarea>
+                <div style="margin-top:10px">
+                    <button class="btn btn-primary" onclick="saveArt('${id || ''}')">发布文章</button>
+                    <button class="btn" onclick="Router.go('/')">取消</button>
+                </div>`;
+        }
+
+        async function saveArt(id) {
+            const title = document.getElementById('ed-title').value;
+            const md = document.getElementById('ed-md').value;
+            let finalId = id || Math.random().toString(36).substr(2, 12);
+            const payload = { id: finalId, title, md, updated_at: new Date() };
+
+            const { error } = id ? await db.from('article').update(payload).eq('id', id) : await db.from('article').insert([payload]);
+            if (error) alert(error.message);
+            else { await fetchArticles(); Router.go(finalId === 'home' ? '/' : `/article/${finalId}`); }
+        }
+
+        // --- 6. 基础系统 ---
         async function fetchArticles() {
             const { data } = await db.from('article').select('*').order('created_at', { ascending: false });
             allArticles = data || [];
         }
 
-        function renderArticleHTML(art) {
-            const container = document.getElementById('view-content');
-            const processed = processMkDocsExtensions(art.md || '');
-            
-            container.innerHTML = `
-                <div class="article-content">
-                    <h1>${escapeHtml(art.title)}</h1>
-                    <div style="font-size:12px; color:#999; margin-bottom:20px">
-                        发布: ${new Date(art.created_at).toLocaleDateString()}
-                        ${currentUser ? ` | <a href="javascript:Router.go('/article/${art.id}/edit')">编辑</a>` : ''}
-                    </div>
-                    <div id="md-render">${marked.parse(processed)}</div>
-                </div>`;
-
-            const target = document.getElementById('md-render');
-            initAdmonitions(target);
-            initTabs(target);
-            renderMathInElement(target, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}] });
-            target.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
-            window.scrollTo(0,0);
-        }
-
-        async function showHome() {
-            const home = allArticles.find(a => a.id === 'home');
-            if (home) renderArticleHTML(home);
-            else document.getElementById('view-content').innerHTML = `<h1>欢迎</h1><p>请在左侧选择文章或新建首页。</p>`;
-        }
-
-        async function showDetail(id) {
-            const art = allArticles.find(a => a.id == id);
-            art ? renderArticleHTML(art) : document.getElementById('view-content').innerHTML = `<h1>404</h1>`;
-        }
-
-        async function showEditor(id = null) {
-            if (!currentUser) return Router.go('/');
-            const art = id ? allArticles.find(a => a.id == id) : { title: '', md: '' };
-            document.getElementById('view-content').innerHTML = `
-                <div class="editor-wrap">
-                    <h2>${id ? '编辑文章' : '新文章'}</h2>
-                    <input id="ed-title" class="input-field" placeholder="标题" value="${escapeHtml(art.title)}">
-                    <textarea id="ed-md" class="input-field" placeholder="内容 (Markdown)">${art.md}</textarea>
-                    <div>
-                        <button class="btn btn-primary" onclick="saveArticle('${id || ''}')">保存</button>
-                        <button class="btn" onclick="Router.go('/')">取消</button>
-                    </div>
-                </div>`;
-        }
-
-        async function saveArticle(id) {
-            const title = document.getElementById('ed-title').value;
-            const md = document.getElementById('ed-md').value;
-            const payload = { title, md, updated_at: new Date() };
-            let finalId = id;
-
-            if (id) {
-                await db.from('article').update(payload).eq('id', id);
-            } else {
-                finalId = Math.random().toString(36).substr(2, 12);
-                payload.id = finalId;
-                await db.from('article').insert([payload]);
-            }
-            await fetchArticles();
-            Router.go(finalId === 'home' ? '/' : '/article/' + finalId);
-        }
-
-        // --- 5. 辅助功能 ---
-        function renderSidebar() {
+        function updateSidebar() {
             const nav = document.getElementById('sidebar-nav');
-            const cur = Router.getParams().id;
-            let h = `<a class="nav-item ${!cur?'active':''}" onclick="Router.go('/')">首页</a>`;
-            if (currentUser) h += `<a class="nav-item" style="color:green" onclick="Router.go('/article/new')">+ 新建</a>`;
-            h += `<div class="nav-group-title">文章列表</div>`;
-            allArticles.filter(a=>a.id!=='home').forEach(a => {
-                h += `<a class="nav-item ${cur===a.id?'active':''}" onclick="Router.go('/article/${a.id}')">${escapeHtml(a.title)}</a>`;
+            const cur = Router.get().id;
+            let h = `<div class="nav-item ${!cur?'active':''}" onclick="Router.go('/')">首页</div>`;
+            if (currentUser) h += `<div class="nav-item" style="color:green" onclick="Router.go('/article/new')">+ 新建文章</div>`;
+            h += `<div style="padding:20px 24px 5px; font-size:12px; color:#999">所有文章</div>`;
+            allArticles.filter(a => a.id !== 'home').forEach(a => {
+                h += `<div class="nav-item ${cur==a.id?'active':''}" onclick="Router.go('/article/${a.id}')">${a.title}</div>`;
             });
             nav.innerHTML = h;
         }
 
-        async function checkAuth() {
+        async function initAuth() {
             const { data } = await db.auth.getSession();
-            currentUser = data.session?.user || null;
-            const zone = document.getElementById('auth-ui');
-            zone.innerHTML = currentUser ? 
+            currentUser = data.session?.user;
+            document.getElementById('auth-ui').innerHTML = currentUser ? 
                 `<button class="btn" onclick="db.auth.signOut().then(()=>location.reload())">退出</button>` : 
                 `<button class="btn" onclick="login()">登录</button>`;
         }
 
         async function login() {
-            const email = prompt("Email:"), pass = prompt("Pass:");
-            if (email && pass) await db.auth.signInWithPassword({email, password:pass}).then(()=>location.reload());
+            const e = prompt("Email:"), p = prompt("Password:");
+            if (e && p) await db.auth.signInWithPassword({email:e, password:p}).then(()=>location.reload());
         }
 
-        function escapeHtml(s) { const t = document.createElement('t'); t.textContent = s; return t.innerHTML; }
-
-        window.onload = async () => { await checkAuth(); await fetchArticles(); Router.handle(); };
+        window.onload = async () => { await initAuth(); await fetchArticles(); Router.handle(); };
         window.onpopstate = () => Router.handle();
     </script>
 </body>
