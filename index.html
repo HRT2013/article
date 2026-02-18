@@ -2,9 +2,8 @@
 <html lang="zh-CN" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Wiki</title>
-    <link rel="icon" href="https://cdn.luogu.com.cn/upload/usericon/1057417.png" type="image/png">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-light.min.css" id="hljs-theme">
@@ -12,8 +11,9 @@
 
     <style>
         :root {
+            /* Apple Colors */
             --bg-body: #ffffff;
-            --bg-sidebar: #f5f5f7;
+            --bg-sidebar: #fbfbfd;
             --bg-card: #ffffff;
             --text-primary: #1d1d1f;
             --text-secondary: #86868b;
@@ -23,8 +23,10 @@
             --glass: rgba(255, 255, 255, 0.85);
             --nav-hover: rgba(0,0,0,0.05);
             --code-bg: #f5f5f7;
+            
+            /* Dimensions */
             --header-h: 52px;
-            --sidebar-w: 260px;
+            --sidebar-w: 280px;
             --toc-w: 240px;
         }
 
@@ -49,11 +51,11 @@
             background: var(--bg-body);
             color: var(--text-primary);
             line-height: 1.6;
-            transition: background 0.3s, color 0.3s;
-            overflow-y: scroll;
+            transition: background 0.3s;
+            overflow-x: hidden; /* 防止移动端侧滑溢出 */
         }
 
-        /* 顶部导航 */
+        /* --- 顶部导航栏 --- */
         .header {
             position: fixed; top: 0; width: 100%; height: var(--header-h);
             background: var(--glass);
@@ -61,122 +63,211 @@
             -webkit-backdrop-filter: saturate(180%) blur(20px);
             border-bottom: 1px solid var(--divider);
             z-index: 1000;
-            display: flex; align-items: center; padding: 0 24px;
+            display: flex; align-items: center; padding: 0 16px;
+            justify-content: space-between;
         }
-        .header-inner { max-width: 1400px; margin: 0 auto; width: 100%; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-weight: 600; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-        .header-controls { display: flex; gap: 16px; align-items: center; }
-        .icon-btn { cursor: pointer; font-size: 1.1rem; color: var(--text-primary); background: none; border: none; opacity: 0.8; transition: 0.2s; }
+        
+        /* 移动端菜单按钮 */
+        .mobile-btn {
+            display: none; font-size: 1.2rem; color: var(--accent);
+            background: none; border: none; padding: 8px; cursor: pointer;
+        }
+
+        .header-title {
+            font-weight: 600; font-size: 1.1rem; cursor: pointer;
+            position: absolute; left: 50%; transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        .header-actions { display: flex; gap: 12px; align-items: center; z-index: 1001; }
+        .icon-btn { cursor: pointer; font-size: 1.1rem; color: var(--text-primary); background: none; border: none; opacity: 0.7; transition: 0.2s; }
         .icon-btn:hover { opacity: 1; color: var(--accent); }
 
-        /* 布局 */
+        /* --- 布局结构 --- */
         .layout {
             display: grid;
             grid-template-columns: var(--sidebar-w) 1fr var(--toc-w);
-            max-width: 1400px;
+            max-width: 1440px;
             margin: var(--header-h) auto 0;
             min-height: calc(100vh - var(--header-h));
+            transition: all 0.3s ease;
         }
 
-        /* 侧边栏 */
+        /* 左侧边栏 (搜索 + 文件夹) */
         .sidebar {
             position: sticky; top: var(--header-h); height: calc(100vh - var(--header-h));
-            overflow-y: auto; padding: 30px 20px;
-            border-right: 1px solid var(--divider);
-            background: var(--bg-body);
+            background: var(--bg-sidebar); border-right: 1px solid var(--divider);
+            display: flex; flex-direction: column; z-index: 900;
         }
-        .nav-group { margin-bottom: 24px; }
-        .nav-title { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px; padding-left: 10px; }
+        
+        .sidebar-search { padding: 16px; border-bottom: 1px solid var(--divider); background: var(--bg-sidebar); position: sticky; top: 0; z-index: 10; }
+        .search-input {
+            width: 100%; padding: 8px 12px 8px 32px; border-radius: 8px; border: none;
+            background: rgba(128,128,128,0.1); color: var(--text-primary); font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .search-input:focus { background: rgba(128,128,128,0.15); box-shadow: 0 0 0 2px var(--accent); }
+        .search-icon { position: absolute; left: 26px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 0.8rem; pointer-events: none; }
+
+        .sidebar-nav { overflow-y: auto; flex: 1; padding: 10px 16px; }
+        
+        /* 文件夹样式 */
+        .folder-group { margin-bottom: 12px; }
+        .folder-title {
+            font-size: 0.75rem; font-weight: 600; color: var(--text-secondary);
+            text-transform: uppercase; padding: 8px 4px; display: flex; justify-content: space-between;
+            cursor: pointer; user-select: none;
+        }
+        .folder-title:hover { color: var(--text-primary); }
+        .folder-content { padding-left: 0; }
+        .folder-content.hidden { display: none; }
+
         .nav-item {
             display: block; padding: 8px 12px; border-radius: 8px;
             color: var(--text-primary); text-decoration: none; font-size: 0.9rem; font-weight: 500;
-            transition: 0.2s; cursor: pointer; margin-bottom: 2px;
+            cursor: pointer; transition: 0.1s; margin-bottom: 2px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .nav-item:hover { background: var(--nav-hover); }
-        .nav-item.active { background: var(--nav-hover); color: var(--accent); }
+        .nav-item.active { background: var(--nav-hover); color: var(--accent); font-weight: 600; }
 
-        /* 内容区 */
-        .main-content { padding: 40px 60px; min-width: 0; }
-
+        /* 中间内容 */
+        .main-content { padding: 40px 60px; min-width: 0; background: var(--bg-body); }
+        
         /* 右侧大纲 */
         .toc-sidebar {
             position: sticky; top: var(--header-h); height: calc(100vh - var(--header-h));
-            overflow-y: auto; padding: 40px 20px;
+            overflow-y: auto; padding: 30px 20px;
+            border-left: 1px solid transparent;
         }
-        .toc-header { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 15px; }
+        .toc-header { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 15px; letter-spacing: 0.5px; }
         .toc-link {
             display: block; text-decoration: none; color: var(--text-secondary);
-            font-size: 0.85rem; padding: 4px 0 4px 12px; border-left: 2px solid var(--divider);
-            transition: 0.2s;
+            font-size: 0.85rem; padding: 4px 0 4px 10px; border-left: 2px solid var(--divider);
+            transition: 0.2s; line-height: 1.4;
         }
         .toc-link:hover { color: var(--text-primary); }
-        .toc-link.active { color: var(--accent); border-left-color: var(--accent); }
-        .toc-link.h3 { padding-left: 24px; }
+        .toc-link.active { color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+        .toc-link.h3 { padding-left: 20px; }
 
-        /* 排版样式 */
-        h1 { font-size: 2.5rem; margin-bottom: 0.5em; font-weight: 700; letter-spacing: -0.02em; }
-        h2 { font-size: 1.8rem; margin: 1.5em 0 0.8em; padding-bottom: 0.3em; border-bottom: 1px solid var(--divider); scroll-margin-top: 80px; }
-        h3 { font-size: 1.4rem; margin: 1.2em 0 0.5em; scroll-margin-top: 80px; }
-        p { margin-bottom: 1.2em; }
-        code { font-family: "SF Mono", monospace; font-size: 0.9em; background: var(--nav-hover); padding: 2px 6px; border-radius: 6px; color: var(--accent); }
-        pre { background: var(--code-bg); padding: 20px; border-radius: 12px; overflow-x: auto; margin: 1.5em 0; border: 1px solid var(--divider); }
-        img { max-width: 100%; border-radius: 12px; margin: 1em 0; }
+        /* --- 遮罩层 (移动端) --- */
+        .backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 800;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            backdrop-filter: blur(2px);
+        }
+        .backdrop.show { opacity: 1; pointer-events: auto; }
 
-        /* 折叠框与选项卡 */
-        .admonition { margin: 1.5em 0; border-radius: 12px; border: 1px solid var(--divider); background: var(--bg-card); overflow: hidden; }
-        .admonition-title { padding: 12px 16px; background: var(--nav-hover); font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; cursor: pointer; }
-        .admonition-title i { margin-right: 10px; }
+        /* --- 响应式设计 (重点修改) --- */
+        @media (max-width: 1000px) {
+            .layout { grid-template-columns: 1fr; }
+            
+            /* 隐藏默认侧边栏，改为抽屉式 */
+            .sidebar {
+                position: fixed; left: -100%; top: var(--header-h); bottom: 0;
+                width: 280px; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+                border-right: none;
+            }
+            .sidebar.open { left: 0; }
+
+            .toc-sidebar {
+                position: fixed; right: -100%; top: var(--header-h); bottom: 0;
+                width: 260px; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                background: var(--bg-body); border-left: 1px solid var(--divider);
+                z-index: 900; box-shadow: -2px 0 12px rgba(0,0,0,0.1);
+            }
+            .toc-sidebar.open { right: 0; }
+
+            .mobile-btn { display: block; } /* 显示汉堡菜单 */
+            .main-content { padding: 30px 20px; }
+            .header-title { position: static; transform: none; margin-left: 10px; flex: 1; text-align: left;}
+        }
+
+        /* --- 编辑器样式 --- */
+        .editor-wrap { max-width: 800px; margin: 0 auto; }
+        .editor-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .editor-input { 
+            width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; 
+            background: var(--bg-body); color: var(--text-primary); font-family: inherit;
+        }
+        .editor-input.title { font-size: 1.5rem; font-weight: 700; border: none; padding-left: 0; background: transparent; }
+        .editor-area {
+            width: 100%; min-height: 60vh; padding: 15px; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--code-bg); color: var(--text-primary); font-family: "SF Mono", monospace;
+            line-height: 1.6; resize: vertical;
+        }
+
+        /* --- Markdown 组件 (折叠框/Tabs) --- */
+        .admonition { margin: 1.5em 0; border: 1px solid var(--divider); border-radius: 8px; overflow: hidden; background: var(--bg-card); }
+        .admonition-title { padding: 10px 16px; background: var(--nav-hover); font-weight: 600; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; }
+        .admonition-title i { margin-right: 8px; }
         .admonition-title::after { content: "\f078"; font-family: "Font Awesome 6 Free"; margin-left: auto; font-size: 0.8em; transition: 0.3s; }
         .admonition.collapsed .admonition-title::after { transform: rotate(-90deg); }
-        .admonition-content { padding: 20px; border-top: 1px solid var(--divider); }
+        .admonition-content { padding: 16px; border-top: 1px solid var(--divider); }
         .admonition.collapsed .admonition-content { display: none; }
-        
-        .admonition.note .admonition-title { color: #0066cc; }
+        .admonition.note .admonition-title { color: #007aff; }
         .admonition.warning .admonition-title { color: #ff9500; }
         .admonition.danger .admonition-title { color: #ff3b30; }
 
-        .tab-group { margin: 1.5em 0; border: 1px solid var(--divider); border-radius: 12px; background: var(--bg-card); }
+        .tab-group { margin: 1.5em 0; border: 1px solid var(--divider); border-radius: 8px; overflow: hidden; }
         .tab-labels { display: flex; background: var(--nav-hover); border-bottom: 1px solid var(--divider); overflow-x: auto; }
-        .tab-label { padding: 10px 20px; cursor: pointer; font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); border-bottom: 2px solid transparent; white-space: nowrap; }
-        .tab-label.active { color: var(--text-primary); border-bottom-color: var(--accent); }
-        .tab-content { display: none; padding: 20px; }
-        .tab-content.active { display: block; animation: fade 0.3s; }
-        @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-label { padding: 10px 20px; font-size: 0.9rem; cursor: pointer; color: var(--text-secondary); border-bottom: 2px solid transparent; white-space: nowrap; }
+        .tab-label.active { color: var(--text-primary); border-bottom-color: var(--accent); background: var(--bg-card); font-weight: 500; }
+        .tab-content { padding: 20px; display: none; background: var(--bg-card); }
+        .tab-content.active { display: block; animation: fade 0.2s; }
+        @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
-        /* 加载状态 */
-        #loading-screen { position: fixed; top: 52px; left: 0; right: 0; bottom: 0; background: var(--bg-body); z-index: 500; display: flex; justify-content: center; align-items: center; color: var(--text-secondary); }
+        /* 排版微调 */
+        h1, h2, h3 { color: var(--text-primary); scroll-margin-top: 80px; }
+        h1 { margin-bottom: 30px; font-weight: 800; }
+        h2 { border-bottom: 1px solid var(--divider); padding-bottom: 8px; margin-top: 40px; }
+        p { margin-bottom: 16px; color: var(--text-primary); }
+        pre { background: var(--code-bg); padding: 16px; border-radius: 8px; margin: 20px 0; overflow-x: auto; }
+        img { max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
-        /* 响应式 */
-        @media (max-width: 1100px) { .toc-sidebar { display: none; } .layout { grid-template-columns: var(--sidebar-w) 1fr; } }
-        @media (max-width: 768px) { .sidebar { display: none; } .layout { grid-template-columns: 1fr; } .main-content { padding: 30px 20px; } }
-        
-        /* 编辑器 */
-        .editor-input { width: 100%; padding: 10px; font-size: 1.5rem; border: none; background: transparent; color: var(--text-primary); font-weight: bold; margin-bottom: 20px; font-family: inherit; }
-        .editor-area { width: 100%; min-height: 60vh; padding: 15px; background: var(--bg-sidebar); border-radius: 8px; border: none; color: var(--text-primary); resize: vertical; font-family: "SF Mono", monospace; }
-        .btn { padding: 8px 16px; border-radius: 18px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: 0.2s; }
+        .btn { padding: 8px 20px; border: none; border-radius: 20px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: 0.2s; }
         .btn-primary { background: var(--accent); color: white; }
         .btn-ghost { background: transparent; color: var(--text-secondary); }
     </style>
 </head>
 <body>
 
+    <div class="backdrop" onclick="closeDrawers()"></div>
+
     <header class="header">
-        <div class="header-inner">
-            <div class="logo" onclick="Router.go('/')">HRT's Wiki</div>
-            <div class="header-controls">
-                <button class="icon-btn" onclick="toggleTheme()"><i class="fas fa-moon" id="theme-icon"></i></button>
-                <div id="auth-box"></div>
-            </div>
+        <button class="mobile-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <div class="header-title" onclick="Router.go('/')">Wiki</div>
+        
+        <div class="header-actions">
+            <button class="mobile-btn" onclick="toggleTOC()" id="btn-toc">
+                <i class="fas fa-list-ul"></i>
+            </button>
+            
+            <button class="icon-btn" onclick="toggleTheme()">
+                <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
+            <div id="auth-box"></div>
         </div>
     </header>
 
-    <div id="loading-screen"><i class="fas fa-spinner fa-spin fa-2x"></i></div>
-
     <div class="layout">
-        <aside class="sidebar" id="sidebar-nav"></aside>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-search">
+                <i class="fas fa-search search-icon"></i>
+                <input class="search-input" placeholder="搜索文章..." oninput="handleSearch(this.value)">
+            </div>
+            <div class="sidebar-nav" id="sidebar-list">
+                </div>
+        </aside>
+
         <main class="main-content" id="view-area"></main>
-        <aside class="toc-sidebar">
-            <div class="toc-header">ON THIS PAGE</div>
+
+        <aside class="toc-sidebar" id="toc-sidebar">
+            <div class="toc-header">目录</div>
             <div id="toc-list"></div>
         </aside>
     </div>
@@ -188,37 +279,19 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 
     <script>
-        // --- 系统初始化 ---
-        function initTheme() {
-            const t = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', t);
-            document.getElementById('theme-icon').className = t==='dark' ? 'fas fa-sun' : 'fas fa-moon';
-            document.getElementById('hljs-theme').href = t==='dark' 
-                ? "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css"
-                : "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-light.min.css";
-        }
-        function toggleTheme() {
-            const cur = document.documentElement.getAttribute('data-theme');
-            const nxt = cur === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('theme', nxt);
-            initTheme();
-        }
-        initTheme();
-
-        // --- Supabase ---
+        // --- 系统状态 ---
         const CONFIG = {
             URL: 'https://qalinnggueysnsfrmoux.supabase.co',
             KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhbGlubmdndWV5c25zZnJtb3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2ODUwNjgsImV4cCI6MjA4NjI2MTA2OH0.rlngJnOtXVs-Q1qXxN8iSrTCbjslJu0K_qouVsgOfj0'
         };
         const db = window.supabase.createClient(CONFIG.URL, CONFIG.KEY);
-        let currentUser = null, allArticles = [];
+        let currentUser = null, allArticles = [], currentSearch = '';
 
-        // --- 核心解析器 (保持折叠框/Tabs功能) ---
+        // --- 核心：Markdown 解析器 (保留折叠/选项卡逻辑) ---
         function parseAndRender(md) {
             if (!md) return '';
             const lines = md.split('\n');
             let html = '', buf = [];
-
             const flush = () => { if(buf.length){ html+=marked.parse(buf.join('\n')); buf=[]; }};
 
             for(let i=0; i<lines.length; i++){
@@ -240,7 +313,7 @@
                     const [_,s,type,ti] = adm;
                     const icon = type==='warning'?'fa-exclamation-triangle':(type==='danger'?'fa-bolt':'fa-info-circle');
                     html += `<div class="admonition ${type} ${s.includes('+')?'':'collapsed'}"><div class="admonition-title" onclick="this.parentElement.classList.toggle('collapsed')"><i class="fas ${icon}"></i>${ti||type.toUpperCase()}</div><div class="admonition-content">${inner}</div></div>`;
-                }
+                } 
                 else if(tab){
                     flush();
                     let tabs=[]; i--;
@@ -279,69 +352,103 @@
             g.querySelectorAll('.tab-content').forEach((e,i)=>e.classList.toggle('active',i===x));
         };
 
-        // --- 逻辑控制 ---
+        // --- 路由与视图 ---
         const Router = {
-            get() { const p=window.location.pathname; return { id:p.match(/\/article\/([^/]+)/)?.[1], new:p.endsWith('/new'), edit:p.endsWith('/edit') }; },
-            go(p) { window.history.pushState(null,'',p); this.handle(); },
+            get() { const p=location.pathname; return { id:p.match(/\/article\/([^/]+)/)?.[1], new:p.endsWith('/new'), edit:p.endsWith('/edit') }; },
+            go(p) { history.pushState(null,'',p); this.handle(); closeDrawers(); },
             handle() {
                 const p = this.get();
-                // 隐藏/显示 TOC
-                document.querySelector('.toc-sidebar').style.display = (p.new||p.edit) ? 'none' : 'block';
+                // 仅阅读模式显示目录按钮
+                document.getElementById('btn-toc').style.display = (p.new||p.edit) ? 'none' : 'block';
+                document.getElementById('toc-sidebar').style.display = (p.new||p.edit) ? 'none' : 'block';
                 
                 if(p.new) renderEditor();
                 else if(p.id && p.edit) renderEditor(p.id);
                 else if(p.id) showDetail(p.id);
                 else renderHome();
-                
-                renderSidebar();
             }
         };
 
-        async function fetchArticles() {
-            try {
-                const {data, error} = await db.from('article').select('*').order('created_at',{ascending:false});
-                if(error) throw error;
-                allArticles = data || [];
-                // 移除加载遮罩
-                document.getElementById('loading-screen').style.display = 'none';
-            } catch(e) {
-                console.error(e);
-                document.getElementById('loading-screen').innerHTML = `<div style="text-align:center"><p>连接失败</p><small>${e.message}</small></div>`;
-            }
-        }
-
+        // --- 侧边栏 (支持搜索与文件夹) ---
         function renderSidebar() {
-            const nav = document.getElementById('sidebar-nav');
-            const cur = Router.get().id;
-            let h = `<div class="nav-group"><div class="nav-title">Menu</div>`;
-            h += `<a class="nav-item ${!cur?'active':''}" onclick="Router.go('/')">首页</a>`;
-            if(currentUser) h += `<a class="nav-item" onclick="Router.go('/article/new')">+ 新建</a>`;
-            h += `</div><div class="nav-group"><div class="nav-title">Articles</div>`;
-            allArticles.filter(a=>a.id!=='home').forEach(a=>{
-                h += `<a class="nav-item ${cur==a.id?'active':''}" onclick="Router.go('/article/${a.id}')">${escapeHtml(a.title)}</a>`;
+            const nav = document.getElementById('sidebar-list');
+            const curId = Router.get().id;
+            
+            // 过滤文章
+            let filtered = allArticles.filter(a => a.id !== 'home');
+            if (currentSearch) {
+                const term = currentSearch.toLowerCase();
+                filtered = filtered.filter(a => a.title.toLowerCase().includes(term));
+            }
+
+            // 按文件夹分组
+            const groups = {};
+            filtered.forEach(a => {
+                const f = a.folder || '未分类';
+                if(!groups[f]) groups[f] = [];
+                groups[f].push(a);
             });
-            h += `</div>`;
+
+            let h = `<div class="nav-item ${!curId && !Router.get().new ?'active':''}" onclick="Router.go('/')"><i class="fas fa-home"></i> 首页</div>`;
+            if(currentUser) h += `<div class="nav-item ${Router.get().new?'active':''}" style="color:var(--accent)" onclick="Router.go('/article/new')"><i class="fas fa-plus"></i> 新建文章</div>`;
+            h += `<div style="height:10px"></div>`;
+
+            // 渲染分组
+            Object.keys(groups).sort().forEach(folderName => {
+                const isUncat = folderName === '未分类';
+                // 默认展开所有文件夹，或者你可以加逻辑记录展开状态
+                h += `
+                <div class="folder-group">
+                    <div class="folder-title" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                        ${folderName} <span style="font-weight:400;opacity:0.6">${groups[folderName].length}</span>
+                    </div>
+                    <div class="folder-content">
+                        ${groups[folderName].map(a => `
+                            <div class="nav-item ${curId===a.id?'active':''}" onclick="Router.go('/article/${a.id}')">
+                                ${escapeHtml(a.title)}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+            });
             nav.innerHTML = h;
         }
 
-        async function renderHome() {
-            const home = allArticles.find(a=>a.id==='home');
-            if(home) showDetail('home');
-            else document.getElementById('view-area').innerHTML = `<div style="text-align:center;margin-top:100px;"><h1>Welcome</h1><p>Wiki Ready.</p>${currentUser?`<button class="btn btn-primary" onclick="initHome()">Init Home</button>`:''}</div>`;
+        function handleSearch(val) {
+            currentSearch = val;
+            renderSidebar();
         }
 
+        // --- 详情页与目录 ---
         async function showDetail(id) {
-            const art = allArticles.find(a=>a.id==id);
-            if(!art) return;
+            const art = allArticles.find(a => a.id == id);
+            const container = document.getElementById('view-area');
+            if(!art) return container.innerHTML = "<h1>404</h1>";
+
+            // 1. 生成 HTML (不含数学公式)
             const html = parseAndRender(art.md||'');
-            const c = document.getElementById('view-area');
-            c.innerHTML = `<h1>${escapeHtml(art.title)}</h1><div style="margin-bottom:30px;color:var(--text-secondary);font-size:0.9rem">${new Date(art.created_at).toLocaleDateString()} ${currentUser?` · <a onclick="Router.go('/article/${id}/edit')" style="cursor:pointer;color:var(--accent)">编辑</a>`:''}</div><div id="md-root">${html}</div>`;
             
-            // 后处理
+            container.innerHTML = `
+                <div style="margin-bottom:20px">
+                    <h1>${escapeHtml(art.title)}</h1>
+                    <div style="font-size:0.9rem; color:var(--text-secondary);">
+                        <span style="background:var(--nav-hover);padding:2px 8px;border-radius:4px">${escapeHtml(art.folder||'未分类')}</span>
+                        · ${new Date(art.created_at).toLocaleDateString()}
+                        ${currentUser ? ` · <a onclick="Router.go('/article/${id}/edit')" style="cursor:pointer;color:var(--accent)">编辑</a>` : ''}
+                    </div>
+                </div>
+                <div id="md-root">${html}</div>
+            `;
+
+            // 2. 先生成目录 (TOC) - 此时数学公式还是原始 TeX，可以拿到纯文本
+            genTOC();
+
+            // 3. 最后渲染数学公式 (这样目录里不会有重复的 KaTeX HTML)
             const root = document.getElementById('md-root');
             renderMathInElement(root, {delimiters:[{left:"$$",right:"$$",display:true},{left:"$",right:"$",display:false}]});
+            
+            // 4. 代码高亮
             root.querySelectorAll('pre code').forEach(el=>hljs.highlightElement(el));
-            genTOC();
             window.scrollTo(0,0);
         }
 
@@ -351,7 +458,7 @@
             const toc = document.getElementById('toc-list');
             toc.innerHTML = '';
             
-            if(heads.length===0) return toc.innerHTML = '<div style="color:var(--text-secondary);font-size:0.85rem">暂无目录</div>';
+            if(heads.length===0) return toc.innerHTML = '<div style="color:var(--text-secondary);font-size:0.85rem;padding:10px">暂无目录</div>';
 
             const observer = new IntersectionObserver(e => {
                 e.forEach(entry => {
@@ -367,42 +474,113 @@
                 h.id = 'h-'+i;
                 const link = document.createElement('a');
                 link.className = `toc-link ${h.tagName.toLowerCase()}`;
-                link.innerText = h.innerText;
+                // 这里的 innerText 获取的是未被 Katex 渲染的文本，或者我们可以简单过滤
+                link.innerText = h.innerText; 
                 link.id = 'link-h-'+i;
-                link.onclick = () => { document.getElementById('h-'+i).scrollIntoView({behavior:'smooth'}); };
+                link.onclick = () => { 
+                    document.getElementById('h-'+i).scrollIntoView({behavior:'smooth'}); 
+                    closeDrawers();
+                };
                 toc.appendChild(link);
                 observer.observe(h);
             });
+            
+            // TOC 生成后再渲染 TOC 里的数学公式 (如果标题里有公式)
+            renderMathInElement(toc, {delimiters:[{left:"$",right:"$",display:false}]});
         }
 
+        // --- 编辑器 (含文件夹) ---
         async function renderEditor(id=null) {
             if(!currentUser) return Router.go('/');
-            const art = id?allArticles.find(a=>a.id==id):{title:'',md:''};
+            const art = id?allArticles.find(a=>a.id==id):{title:'',md:'', folder:''};
             document.getElementById('view-area').innerHTML = `
                 <div class="editor-wrap">
-                    <input id="ed-title" class="input-title" value="${escapeHtml(art.title)}" placeholder="Title">
-                    <textarea id="ed-md" class="editor-area" placeholder="Markdown...">${art.md}</textarea>
-                    <div style="margin-top:20px"><button class="btn btn-primary" onclick="save('${id||''}')">Save</button> <button class="btn btn-ghost" onclick="Router.go('/')">Cancel</button></div>
+                    <input id="ed-title" class="editor-input title" value="${escapeHtml(art.title)}" placeholder="文章标题">
+                    <div class="editor-meta">
+                        <input id="ed-folder" class="editor-input" value="${escapeHtml(art.folder||'')}" placeholder="文件夹 (例如: 算法/图论)">
+                    </div>
+                    <textarea id="ed-md" class="editor-area" placeholder="Markdown content...">${art.md}</textarea>
+                    <div style="margin-top:20px; display:flex; gap:10px">
+                        <button class="btn btn-primary" onclick="save('${id||''}')">保存发布</button>
+                        <button class="btn btn-ghost" onclick="Router.go('/')">取消</button>
+                        ${id ? `<button class="btn btn-ghost" style="color:red;margin-left:auto" onclick="del('${id}')">删除</button>` : ''}
+                    </div>
                 </div>`;
-            document.getElementById('toc-list').innerHTML = '';
+        }
+
+        // --- 数据操作 ---
+        async function fetchArticles() {
+            // 获取 folder 字段
+            const {data, error} = await db.from('article').select('*').order('created_at',{ascending:false});
+            if(error) console.error(error);
+            else allArticles = data || [];
         }
 
         async function save(id) {
             const t = document.getElementById('ed-title').value;
+            const f = document.getElementById('ed-folder').value.trim() || '未分类';
             const m = document.getElementById('ed-md').value;
             const fid = id || Math.random().toString(36).substr(2,10);
-            const p = {id:fid, title:t, md:m, updated_at:new Date()};
+            const p = {id:fid, title:t, folder:f, md:m, updated_at:new Date()};
+            
             const {error} = id ? await db.from('article').update(p).eq('id',id) : await db.from('article').insert([p]);
-            if(error) alert(error.message); else { await fetchArticles(); Router.go(fid==='home'?'/':`/article/${fid}`); }
+            if(error) alert("保存失败 (请检查数据库是否有folder字段): " + error.message); 
+            else { await fetchArticles(); Router.go(fid==='home'?'/':`/article/${fid}`); }
         }
 
-        async function initHome(){ await db.from('article').insert([{id:'home',title:'Home',md:'Welcome!',created_at:new Date()}]); await fetchArticles(); Router.handle(); }
-        async function checkAuth(){ const {data}=await db.auth.getSession(); currentUser=data.session?.user; document.getElementById('auth-box').innerHTML=currentUser?`<button class="btn btn-ghost" onclick="db.auth.signOut().then(()=>location.reload())">退出</button>`:`<button class="btn btn-primary" onclick="login()">登录</button>`; }
+        async function del(id) {
+            if(confirm("确定删除?")) {
+                await db.from('article').delete().eq('id', id);
+                await fetchArticles(); Router.go('/');
+            }
+        }
+
+        // --- 移动端交互 ---
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.querySelector('.backdrop').classList.toggle('show');
+        }
+        function toggleTOC() {
+            document.getElementById('toc-sidebar').classList.toggle('open');
+            document.querySelector('.backdrop').classList.toggle('show');
+        }
+        function closeDrawers() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('toc-sidebar').classList.remove('open');
+            document.querySelector('.backdrop').classList.remove('show');
+        }
+
+        // --- 杂项 ---
+        async function renderHome() {
+            const home = allArticles.find(a=>a.id==='home');
+            home ? showDetail('home') : document.getElementById('view-area').innerHTML = `<div style="text-align:center;padding:50px"><h1>Wiki Ready</h1>${currentUser?`<button class="btn btn-primary" onclick="initHome()">初始化首页</button>`:''}</div>`;
+        }
+        async function initHome(){ await db.from('article').insert([{id:'home',title:'首页',folder:'系统',md:'Welcome',created_at:new Date()}]); await fetchArticles(); Router.handle(); }
+        
+        async function checkAuth(){ 
+            const {data}=await db.auth.getSession(); currentUser=data.session?.user; 
+            document.getElementById('auth-box').innerHTML=currentUser?
+            `<button class="icon-btn" onclick="db.auth.signOut().then(()=>location.reload())" title="退出"><i class="fas fa-sign-out-alt"></i></button>`:
+            `<button class="btn btn-primary" style="padding:4px 12px;font-size:0.8rem" onclick="login()">登录</button>`; 
+        }
         async function login(){ const e=prompt("Email"),p=prompt("Password"); if(e&&p) await db.auth.signInWithPassword({email:e,password:p}).then(()=>location.reload()); }
         function escapeHtml(s){const d=document.createElement('div');d.innerText=s;return d.innerHTML;}
+        function toggleTheme() {
+            const n = document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+            document.documentElement.setAttribute('data-theme',n);
+            localStorage.setItem('theme',n);
+            document.getElementById('theme-icon').className=n==='dark'?'fas fa-sun':'fas fa-moon';
+            document.getElementById('hljs-theme').href = n==='dark'?"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css":"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-light.min.css";
+        }
 
         // 启动
-        (async()=>{ await checkAuth(); await fetchArticles(); Router.handle(); window.onpopstate=()=>Router.handle(); })();
+        (async()=>{ 
+            const t=localStorage.getItem('theme')||'light'; 
+            document.documentElement.setAttribute('data-theme',t);
+            if(t==='dark') toggleTheme(); else toggleTheme(),toggleTheme(); // 刷新图标状态
+            await checkAuth(); await fetchArticles(); Router.handle(); 
+            window.onpopstate=()=>Router.handle(); 
+        })();
     </script>
 </body>
 </html>
